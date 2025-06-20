@@ -78,6 +78,15 @@ actor NeuroVerse {
     result;
   };
 
+  public func getAgentsForUser(user : Principal) : async [Types.Agent] {
+    switch (userAgents.get(user)) {
+      case (?agentMap) {
+        Iter.toArray(agentMap.vals());
+      };
+      case null { [] };
+    };
+  };
+
   // Helper to get conversation history
   private func getHistory(user : Principal, agentId : Text) : [Types.Message] {
     switch (conversationHistory.get((user, agentId))) {
@@ -92,58 +101,55 @@ actor NeuroVerse {
     conversationHistory.put((user, agentId), Array.append<Types.Message>(history, [message]));
   };
 
-  // Main function to interact with agent using context
-  // public func interactWithAgent(user : Principal, agentId : Text, userPrompt : Text) : async Text {
-  //   let timestamp = Time.now();
+  public shared func chatWithAgent(agentId : Text, prompt : Text) : async Text {
+    let caller = Principal.fromActor(NeuroVerse);
 
-  //   switch (userAgents.get(user)) {
-  //     case (?agentMap) {
-  //       switch (agentMap.get(agentId)) {
-  //         case (?agent) {
-  //           // Retrieve conversation history
-  //           let history = getHistory(user, agentId);
+    // Check if the agent exists in the global agents map
+    switch (agents.get(agentId)) {
+      case (?agent) {
+        let timestamp = Time.now();
 
-  //           // Add the new user message to the history
-  //           let userMessage : Types.Message = {
-  //             role = #user;
-  //             content = userPrompt;
-  //             timestamp = Time.now();
-  //           };
+        // Retrieve conversation history for (caller, agentId)
+        let history = getHistory(caller, agentId);
 
-  //           // Optionally, add the system prompt as the first message if history is empty
-  //           let fullHistory = if (history.size() == 0) {
-  //             Array.append(
-  //               [{
-  //                 role = #system_;
-  //                 content = agent.system_prompt;
-  //                 timestamp = timestamp;
-  //               }],
-  //               [userMessage],
-  //             );
-  //           } else {
-  //             Array.append(history, [userMessage]);
-  //           };
+        // Create the new user message
+        let userMessage : Types.Message = {
+          role = #user;
+          content = prompt;
+          timestamp = timestamp;
+        };
 
-  //           // Call LLM with full context
-  //           let response = await LLM.chat(#Llama3_1_8B).withMessages(fullHistory).send();
+        // If history is empty, start with the system prompt
+        let fullHistory = if (history.size() == 0) {
+          Array.append(
+            [{
+              role = #system_;
+              content = agent.system_prompt;
+              timestamp = timestamp;
+            }],
+            [userMessage],
+          );
+        } else {
+          Array.append(history, [userMessage]);
+        };
 
-  //           // Store the user message and assistant response in history
-  //           storeMessage(user, agentId, userMessage);
-  //           let assistantMessage : Types.Message = {
-  //             role = #assistant;
-  //             content = response;
-  //             timestamp = timestamp;
-  //           };
-  //           storeMessage(user, agentId, assistantMessage);
+        // Call the LLM with the full context
+        let response = "To be implemented ";
 
-  //           response;
-  //         };
-  //         case null { "Agent not found." };
-  //       };
-  //     };
-  //     case null { "User not found." };
-  //   };
-  // };
+        // Store the user message and assistant response in history
+        storeMessage(caller, agentId, userMessage);
+        let assistantMessage : Types.Message = {
+          role = #assistant;
+          content = response;
+          timestamp = timestamp;
+        };
+        storeMessage(caller, agentId, assistantMessage);
+
+        response;
+      };
+      case null { "Agent not found." };
+    };
+  };
 
   system func preupgrade() {
     agentStableStore := [];

@@ -4,8 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Store, TrendingUp, Users, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
+import useAllAgents from "@/hooks/useAllAgents"
 
 const Marketplace = () => {
+  const { data: agents } = useAllAgents()
+
+  console.log(agents)
   return (
     <div className="container py-8 space-y-8">
       {/* Header */}

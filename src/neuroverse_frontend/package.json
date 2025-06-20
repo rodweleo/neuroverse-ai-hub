@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@dfinity/auth-client": "^2.4.1",
+    "@dfinity/ledger-icp": "^2.6.13",
+    "@dfinity/ledger-icrc": "^2.8.1",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
