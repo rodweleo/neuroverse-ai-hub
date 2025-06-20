@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Star, Settings } from 'lucide-react';
+import { Send, Settings } from 'lucide-react';
 import { type Agent } from '@/data/agents';
 import { conversationService, type ConversationMemory } from '@/services/conversationService';
 import { analyticsService } from '@/services/analyticsService';
@@ -21,7 +21,6 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>();
-  const [rating, setRating] = useState(0);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -79,21 +78,21 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
 
       setMessages(prev => [...prev, assistantMessage]);
       setConversationId(newConversationId);
-      
+
       // Track analytics
       analyticsService.trackInteraction(agent.id, 1);
-      
+
     } catch (error) {
       console.error('Chat error:', error);
-      
+
       // Show specific error message for AI configuration
       if (error instanceof Error && error.message.includes('API key')) {
         toast({
           title: "AI Configuration Required",
           description: "Please configure your AI settings to enable real conversations.",
           action: (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => {
                 setIsOpen(false);
@@ -118,37 +117,17 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
     }
   };
 
-  const handleRating = (stars: number) => {
-    setRating(stars);
-    analyticsService.rateAgent(agent.id, stars);
-    toast({
-      title: "Thank you!",
-      description: `You rated ${agent.name} ${stars} star${stars !== 1 ? 's' : ''}`,
-    });
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-2xl h-[80vh] glassmorphic border-neon-blue/20">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl h-full max-h-[700px] glassmorphic border-neon-blue/20 flex flex-col">
+        <DialogHeader className="h-fit">
           <DialogTitle className="flex items-center gap-3">
             <agent.icon className={`h-6 w-6 ${agent.color}`} />
             <span className="holographic-text">{agent.name}</span>
-            <div className="flex gap-1 ml-auto">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className={`h-4 w-4 cursor-pointer transition-colors ${
-                    star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'
-                  }`}
-                  onClick={() => handleRating(star)}
-                />
-              ))}
-            </div>
           </DialogTitle>
         </DialogHeader>
-        
-        <div className="flex flex-col h-full">
+
+        <div className="flex flex-col flex-1">
           <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
             <div className="space-y-4">
               {messages.map((message) => (
@@ -157,11 +136,10 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
-                      message.role === 'user'
-                        ? 'bg-neon-blue/20 text-right'
-                        : 'bg-neon-purple/20'
-                    }`}
+                    className={`max-w-[80%] p-3 rounded-lg ${message.role === 'user'
+                      ? 'bg-neon-blue/20 text-right'
+                      : 'bg-neon-purple/20'
+                      }`}
                   >
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     <span className="text-xs text-muted-foreground mt-1 block">
@@ -183,7 +161,7 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
               )}
             </div>
           </ScrollArea>
-          
+
           <div className="flex gap-2 mt-4">
             <Input
               value={inputValue}

@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import AgentEditForm from './AgentEditForm';
 import { KnowledgeDocument } from './DocumentUpload';
 import { KnowledgeConfig } from './KnowledgeBaseManager';
+import useUserAgents from '@/hooks/useUserAgents';
+import { useAuth } from '@/contexts/use-auth-client';
 
 interface EnhancedAgent {
   id: string;
@@ -31,6 +33,8 @@ interface EnhancedAgent {
 
 const AgentManagementDashboard = () => {
   const { toast } = useToast();
+  const { principal } = useAuth()
+  const { data: userAgents } = useUserAgents(principal)
   const [agents, setAgents] = useState<EnhancedAgent[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgent, setSelectedAgent] = useState<EnhancedAgent | null>(null);
@@ -75,7 +79,7 @@ const AgentManagementDashboard = () => {
     const updatedAgents = agents.filter(agent => agent.id !== agentId);
     setAgents(updatedAgents);
     localStorage.setItem('custom_agents', JSON.stringify(updatedAgents));
-    
+
     toast({
       title: "Agent Deleted",
       description: "The agent has been successfully removed.",
@@ -140,7 +144,7 @@ const AgentManagementDashboard = () => {
             Manage and edit your deployed AI agents
           </p>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -152,7 +156,7 @@ const AgentManagementDashboard = () => {
             />
           </div>
           <Badge variant="outline" className="text-neon-blue">
-            {filteredAgents.length} agent{filteredAgents.length !== 1 ? 's' : ''}
+            {userAgents ? userAgents.length : 0} agent{filteredAgents.length !== 1 ? 's' : ''}
           </Badge>
         </div>
       </div>
@@ -191,7 +195,7 @@ const AgentManagementDashboard = () => {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground line-clamp-2">
                   {agent.description}
@@ -207,7 +211,7 @@ const AgentManagementDashboard = () => {
                       {agent.knowledgeBase.length} document{agent.knowledgeBase.length !== 1 ? 's' : ''}
                     </span>
                   </div>
-                  
+
                   <div className="space-y-1">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
@@ -223,7 +227,7 @@ const AgentManagementDashboard = () => {
                   <span className="text-xs text-muted-foreground">
                     v{agent.version}
                   </span>
-                  
+
                   <div className="flex items-center gap-1">
                     <Button
                       variant="ghost"
@@ -233,7 +237,7 @@ const AgentManagementDashboard = () => {
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
-                    
+
                     <Dialog open={editDialogOpen && selectedAgent?.id === agent.id} onOpenChange={setEditDialogOpen}>
                       <DialogTrigger asChild>
                         <Button

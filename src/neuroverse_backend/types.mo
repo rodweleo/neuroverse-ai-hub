@@ -2,9 +2,12 @@ module {
     public type Agent = {
         id : Text;
         name : Text;
+        category : Text;
+        description : Text;
         system_prompt : Text;
-        created_by : Principal;
         isFree : Bool;
+        price : Nat;
+        created_by : Principal;
     };
     public type AgentEntry = {
         user : Principal;

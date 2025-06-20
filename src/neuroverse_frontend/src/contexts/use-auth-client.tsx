@@ -23,7 +23,7 @@ export const getIdentityProvider = () => {
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         if (isLocal) {
             if (isSafari) {
-                idpProvider = `http://localhost:4943?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY! || 'umunu-kh777-77774-qaaca-cai'}`;
+                idpProvider = `http://localhost:4943?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY! || "umunu-kh777-77774-qaaca-cai"}`;
             } else {
                 idpProvider = `http://${process.env.CANISTER_ID_INTERNET_IDENTITY! || "u6s2n-gx777-77774-qaaba-cai"}.localhost:4943`
             }

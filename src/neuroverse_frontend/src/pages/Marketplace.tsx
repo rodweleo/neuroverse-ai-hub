@@ -9,7 +9,6 @@ import useAllAgents from "@/hooks/useAllAgents"
 const Marketplace = () => {
   const { data: agents } = useAllAgents()
 
-  console.log(agents)
   return (
     <div className="container py-8 space-y-8">
       {/* Header */}
@@ -38,7 +37,7 @@ const Marketplace = () => {
             <Store className="h-4 w-4 text-neon-blue" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
+            <div className="text-2xl font-bold">{agents ? agents.length : 0}</div>
             <p className="text-xs text-muted-foreground">
               Active in marketplace
             </p>

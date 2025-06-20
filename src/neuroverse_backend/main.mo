@@ -47,15 +47,18 @@ actor NeuroVerse {
     );
   };
 
-  public func createAgent(agentId : Text, name : Text, system_prompt : Text, isFree : Bool) : async () {
+  public func createAgent(agentId : Text, name : Text, category : Text, description : Text, system_prompt : Text, isFree : Bool, price : Nat) : async () {
     let caller = Principal.fromActor(NeuroVerse);
 
     let agent : Types.Agent = {
       id = agentId;
       name = name;
+      category = category;
+      description = description;
       system_prompt = system_prompt;
-      created_by = caller;
       isFree = isFree;
+      price = price;
+      created_by = caller;
     };
 
     // Get or create the user's agent map
