@@ -1,0 +1,287 @@
+
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Edit, Trash2, Search, Brain, FileText, Calendar, Copy } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import AgentEditForm from './AgentEditForm';
+import { KnowledgeDocument } from './DocumentUpload';
+import { KnowledgeConfig } from './KnowledgeBaseManager';
+
+interface EnhancedAgent {
+  id: string;
+  name: string;
+  description: string;
+  role: string;
+  systemPrompt: string;
+  icon: string;
+  color: string;
+  pricing: number;
+  temperature: number;
+  maxTokens: number;
+  knowledgeBase: KnowledgeDocument[];
+  knowledgeConfig: KnowledgeConfig;
+  createdAt: Date;
+  lastModified: Date;
+  version: number;
+}
+
+const AgentManagementDashboard = () => {
+  const { toast } = useToast();
+  const [agents, setAgents] = useState<EnhancedAgent[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAgent, setSelectedAgent] = useState<EnhancedAgent | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+  useEffect(() => {
+    loadAgents();
+  }, []);
+
+  const loadAgents = () => {
+    const stored = localStorage.getItem('custom_agents');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        const agentsWithDates = parsed.map((agent: any) => ({
+          ...agent,
+          createdAt: new Date(agent.createdAt),
+          lastModified: new Date(agent.lastModified || agent.createdAt),
+          knowledgeBase: agent.knowledgeBase || [],
+          knowledgeConfig: agent.knowledgeConfig || {
+            maxContextLength: 4000,
+            searchSensitivity: 0.7,
+            citationsEnabled: true,
+            chunkSize: 1000,
+            overlap: 200
+          }
+        }));
+        setAgents(agentsWithDates);
+      } catch (error) {
+        console.error('Failed to load agents:', error);
+      }
+    }
+  };
+
+  const filteredAgents = agents.filter(agent =>
+    agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    agent.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    agent.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const deleteAgent = (agentId: string) => {
+    const updatedAgents = agents.filter(agent => agent.id !== agentId);
+    setAgents(updatedAgents);
+    localStorage.setItem('custom_agents', JSON.stringify(updatedAgents));
+    
+    toast({
+      title: "Agent Deleted",
+      description: "The agent has been successfully removed.",
+    });
+  };
+
+  const duplicateAgent = (agent: EnhancedAgent) => {
+    const newAgent = {
+      ...agent,
+      id: Date.now().toString(),
+      name: `${agent.name} (Copy)`,
+      createdAt: new Date(),
+      lastModified: new Date(),
+      version: 1
+    };
+
+    const updatedAgents = [...agents, newAgent];
+    setAgents(updatedAgents);
+    localStorage.setItem('custom_agents', JSON.stringify(updatedAgents));
+
+    toast({
+      title: "Agent Duplicated",
+      description: `Created a copy of ${agent.name}`,
+    });
+  };
+
+  const handleAgentUpdate = (updatedAgent: EnhancedAgent) => {
+    const updatedAgents = agents.map(agent =>
+      agent.id === updatedAgent.id
+        ? { ...updatedAgent, lastModified: new Date(), version: agent.version + 1 }
+        : agent
+    );
+    setAgents(updatedAgents);
+    localStorage.setItem('custom_agents', JSON.stringify(updatedAgents));
+    setEditDialogOpen(false);
+    setSelectedAgent(null);
+
+    toast({
+      title: "Agent Updated",
+      description: `${updatedAgent.name} has been successfully updated.`,
+    });
+  };
+
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-orbitron font-bold holographic-text">
+            My Agents
+          </h1>
+          <p className="text-muted-foreground">
+            Manage and edit your deployed AI agents
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search agents..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 w-64 bg-background/50"
+            />
+          </div>
+          <Badge variant="outline" className="text-neon-blue">
+            {filteredAgents.length} agent{filteredAgents.length !== 1 ? 's' : ''}
+          </Badge>
+        </div>
+      </div>
+
+      {filteredAgents.length === 0 ? (
+        <Card className="glassmorphic border-neon-blue/20">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Brain className="h-16 w-16 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No agents found</h3>
+            <p className="text-muted-foreground text-center mb-4">
+              {searchQuery ? 'No agents match your search criteria.' : 'You haven\'t created any agents yet.'}
+            </p>
+            {!searchQuery && (
+              <Button onClick={() => window.location.href = '/deploy'}>
+                Create Your First Agent
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredAgents.map((agent) => (
+            <Card key={agent.id} className="glassmorphic border-neon-blue/20 hover:border-neon-purple/40 transition-colors">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2 rounded-lg bg-background/50 ${agent.color}`}>
+                      <Brain className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{agent.name}</CardTitle>
+                      <Badge variant="secondary" className="text-xs">
+                        {agent.role}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {agent.description}
+                </p>
+
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1">
+                      <FileText className="h-3 w-3" />
+                      <span className="text-muted-foreground">Knowledge:</span>
+                    </div>
+                    <span className="font-medium text-neon-blue">
+                      {agent.knowledgeBase.length} document{agent.knowledgeBase.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      <span className="text-muted-foreground">Modified:</span>
+                    </div>
+                    <span className="font-medium">
+                      {formatDate(agent.lastModified)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                  <span className="text-xs text-muted-foreground">
+                    v{agent.version}
+                  </span>
+                  
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => duplicateAgent(agent)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    
+                    <Dialog open={editDialogOpen && selectedAgent?.id === agent.id} onOpenChange={setEditDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedAgent(agent)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Edit Agent: {agent.name}</DialogTitle>
+                          <DialogDescription>
+                            Update your agent's configuration and knowledge base
+                          </DialogDescription>
+                        </DialogHeader>
+                        {selectedAgent && (
+                          <AgentEditForm
+                            agent={selectedAgent}
+                            onSave={handleAgentUpdate}
+                            onCancel={() => {
+                              setEditDialogOpen(false);
+                              setSelectedAgent(null);
+                            }}
+                          />
+                        )}
+                      </DialogContent>
+                    </Dialog>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteAgent(agent.id)}
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AgentManagementDashboard;
