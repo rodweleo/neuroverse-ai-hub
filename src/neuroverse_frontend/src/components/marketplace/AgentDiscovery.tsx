@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Grid, List, Filter } from "lucide-react";
-import { agents, type Agent } from '@/data/agents';
+import useAllAgents from "@/hooks/useAllAgents"
 import EnhancedAgentCard from './EnhancedAgentCard';
 import AgentTemplates from './AgentTemplates';
 import AgentSearch from './AgentSearch';
@@ -17,39 +17,26 @@ const sortOptions = [
 ];
 
 const AgentDiscovery = () => {
+  const { data: agents } = useAllAgents()
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('popularity');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const filteredAndSortedAgents = useMemo(() => {
-    let filtered = agents.filter(agent => {
-      const matchesSearch = !searchQuery || 
-                          agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          agent.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          agent.role.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesTags = selectedTags.length === 0 || 
-                         selectedTags.some(tag => 
-                           agent.role.toLowerCase().includes(tag.toLowerCase()) ||
-                           agent.description.toLowerCase().includes(tag.toLowerCase())
-                         );
-      
-      return matchesSearch && matchesTags;
-    });
+    let filtered = agents?.filter(agent => {
+      const matchesSearch = !searchQuery ||
+        agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        agent.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        agent.category.toLowerCase().includes(searchQuery.toLowerCase());
 
-    // Sort agents
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'newest':
-          return b.id.localeCompare(a.id);
-        case 'rating':
-        case 'popularity':
-        default:
-          return 0;
-      }
+      const matchesTags = selectedTags.length === 0 ||
+        selectedTags.some(tag =>
+          agent.category.toLowerCase().includes(tag.toLowerCase()) ||
+          agent.description.toLowerCase().includes(tag.toLowerCase())
+        );
+
+      return matchesSearch && matchesTags;
     });
 
     return filtered;
@@ -71,7 +58,7 @@ const AgentDiscovery = () => {
             onSearch={setSearchQuery}
             onTagFilter={setSelectedTags}
           />
-          
+
           {/* Additional Controls */}
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mt-6 pt-6 border-t border-neon-blue/20">
             <div className="flex gap-3 items-center w-full lg:w-auto">
@@ -118,8 +105,8 @@ const AgentDiscovery = () => {
         {/* Agent Grid/List */}
         {filteredAndSortedAgents.length > 0 ? (
           <div className={
-            viewMode === 'grid' 
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
+            viewMode === 'grid'
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               : "space-y-4"
           }>
             {filteredAndSortedAgents.map((agent) => (

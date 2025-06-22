@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Settings } from 'lucide-react';
-import { type Agent } from '@/data/agents';
 import { conversationService, type ConversationMemory } from '@/services/conversationService';
 import { analyticsService } from '@/services/analyticsService';
 import { useToast } from '@/hooks/use-toast';
+import { Agent } from '../../../../declarations/neuroverse_backend/neuroverse_backend.did';
 
 interface ChatModalProps {
   agent: Agent;
@@ -30,7 +30,7 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
       const greeting = {
         id: 'greeting',
         role: 'assistant' as const,
-        content: `Hello! I'm ${agent.name}, your ${agent.role}. How can I help you today?`,
+        content: `Hello! I'm ${agent.name}, your ${agent.category}. How can I help you today?`,
         timestamp: new Date()
       };
       setMessages([greeting]);
@@ -122,7 +122,6 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
       <DialogContent className="max-w-2xl h-full max-h-[700px] glassmorphic border-neon-blue/20 flex flex-col">
         <DialogHeader className="h-fit">
           <DialogTitle className="flex items-center gap-3">
-            <agent.icon className={`h-6 w-6 ${agent.color}`} />
             <span className="holographic-text">{agent.name}</span>
           </DialogTitle>
         </DialogHeader>

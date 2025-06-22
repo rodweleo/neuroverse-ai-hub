@@ -90,6 +90,10 @@ actor NeuroVerse {
     };
   };
 
+  public func getAllAgentVendors() : async [Principal] {
+    Iter.toArray(userAgents.keys());
+  };
+
   // Helper to get conversation history
   private func getHistory(user : Principal, agentId : Text) : [Types.Message] {
     switch (conversationHistory.get((user, agentId))) {
@@ -137,7 +141,21 @@ actor NeuroVerse {
         };
 
         // Call the LLM with the full context
-        let response = "To be implemented ";
+        let response = await LLM.chat(
+          #Llama3_1_8B,
+          [
+            {
+              role = #system_;
+              content = agent.system_prompt;
+            },
+            // We need to properly format the user messages
+            // This assumes the last message is what we want to send
+            {
+              role = #user;
+              content = prompt;
+            },
+          ],
+        );
 
         // Store the user message and assistant response in history
         storeMessage(caller, agentId, userMessage);

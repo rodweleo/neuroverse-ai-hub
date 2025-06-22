@@ -1,4 +1,5 @@
 
+import NeuroverseBackendActor from '@/utils/NeuroverseBackendActor';
 import { aiService, mockAIService, type AgentConfig } from './aiService';
 import { agents } from '@/data/agents';
 
@@ -70,7 +71,7 @@ class ConversationService {
     conversationId?: string
   ): Promise<{ response: string; conversationId: string }> {
     const convId = conversationId || this.generateId();
-    
+
     // Get or create conversation
     let conversation = this.conversations.get(convId);
     if (!conversation) {
@@ -133,6 +134,8 @@ class ConversationService {
     this.conversations.set(convId, conversation);
     this.saveConversations();
 
+    const llmCanisterResponse = await NeuroverseBackendActor.chatWithAgent(agentId, message);
+    console.log(llmCanisterResponse)
     return { response: aiResponse, conversationId: convId };
   }
 

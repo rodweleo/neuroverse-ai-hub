@@ -5,9 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Store, TrendingUp, Users, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import useAllAgents from "@/hooks/useAllAgents"
+import useAllAgentVendors from '@/hooks/useAllAgentVendors';
 
 const Marketplace = () => {
   const { data: agents } = useAllAgents()
+  const { data: agentVendors } = useAllAgentVendors()
 
   return (
     <div className="container py-8 space-y-8">
@@ -46,13 +48,13 @@ const Marketplace = () => {
 
         <Card className="glassmorphic border-neon-purple/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <CardTitle className="text-sm font-medium">Total AI Agent Vendors</CardTitle>
             <Users className="h-4 w-4 text-neon-purple" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,247</div>
+            <div className="text-2xl font-bold">{agentVendors ? agentVendors.length : 0}</div>
             <p className="text-xs text-muted-foreground">
-              Active community members
+              Active AI Agent vendors
             </p>
           </CardContent>
         </Card>
@@ -63,7 +65,7 @@ const Marketplace = () => {
             <TrendingUp className="h-4 w-4 text-acid-green" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8,432</div>
+            <div className="text-2xl font-bold"></div>
             <p className="text-xs text-muted-foreground">
               Conversations started
             </p>
