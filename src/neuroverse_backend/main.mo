@@ -20,6 +20,7 @@ actor NeuroVerse {
     Principal.hash,
   );
 
+  private stable var stableAgents : [(Text, Types.Agent)] = [];
   private stable var agentStableStore : [Types.AgentEntry] = [];
 
   // Assume you have a map to store conversation history per (user, agent)
@@ -60,6 +61,9 @@ actor NeuroVerse {
       price = price;
       created_by = caller;
     };
+
+    // Store in global agents map
+    agents.put(agentId, agent);
 
     // Get or create the user's agent map
     let agentsMap = switch (userAgents.get(caller)) {
@@ -172,7 +176,13 @@ actor NeuroVerse {
     };
   };
 
+  public query (message) func whoami() : async Principal {
+    message.caller;
+  };
+
   system func preupgrade() {
+    stableAgents := Iter.toArray(agents.entries());
+
     agentStableStore := [];
     for ((user, agentMap) in userAgents.entries()) {
       let agentList = Iter.toArray(agentMap.entries());
@@ -197,6 +207,7 @@ actor NeuroVerse {
       };
       userAgents.put(entry.user, agentMap);
     };
+    agents := HashMap.fromIter<Text, Types.Agent>(stableAgents.vals(), 10, Text.equal, Text.hash);
   }
 
 };

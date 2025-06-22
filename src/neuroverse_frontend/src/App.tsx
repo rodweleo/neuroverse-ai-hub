@@ -11,7 +11,8 @@ import Marketplace from "./pages/Marketplace";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/layout/Layout";
 import Providers from "./components/providers";
-
+import MainChatPage from "./pages/Chat/Index";
+import ChatPage from "./pages/Chat/c/[chatId]/page";
 
 const App = () => (
   <Providers>
@@ -26,6 +27,9 @@ const App = () => (
           <Route path="/agents" element={<AgentManagementPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/chat" element={<MainChatPage />}>
+            <Route path="c/:chatId" element={<ChatPage />} />
+          </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

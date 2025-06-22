@@ -69,7 +69,7 @@ const EnhancedAgentCard = ({ agent }: EnhancedAgentCardProps) => {
 
           <div className="flex items-center gap-2 text-sm">
             <h3>Created by:</h3>
-            <p>{agent.created_by.toString()}</p>
+            <p>{agent.created_by?.toString()}</p>
           </div>
           {/* Action Buttons */}
           <div className="grid grid-cols-2 gap-4">

@@ -9,6 +9,8 @@ import { conversationService, type ConversationMemory } from '@/services/convers
 import { analyticsService } from '@/services/analyticsService';
 import { useToast } from '@/hooks/use-toast';
 import { Agent } from '../../../../declarations/neuroverse_backend/neuroverse_backend.did';
+import MessageBubble from './MessageBubble';
+import MessageBubbleLoader from '../ui/message-bubble-loader';
 
 interface ChatModalProps {
   agent: Agent;
@@ -64,7 +66,7 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
 
     try {
       const { response, conversationId: newConversationId } = await conversationService.sendMessage(
-        agent.id,
+        agent.id.toString(),
         inputValue,
         conversationId
       );
@@ -134,29 +136,11 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
                   key={message.id}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div
-                    className={`max-w-[80%] p-3 rounded-lg ${message.role === 'user'
-                      ? 'bg-neon-blue/20 text-right'
-                      : 'bg-neon-purple/20'
-                      }`}
-                  >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    <span className="text-xs text-muted-foreground mt-1 block">
-                      {message.timestamp.toLocaleTimeString()}
-                    </span>
-                  </div>
+                  <MessageBubble message={message} />
                 </div>
               ))}
               {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-neon-purple/20 p-3 rounded-lg">
-                    <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-neon-purple rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-neon-purple rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-neon-purple rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    </div>
-                  </div>
-                </div>
+                <MessageBubbleLoader />
               )}
             </div>
           </ScrollArea>

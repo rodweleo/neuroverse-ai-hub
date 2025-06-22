@@ -1,6 +1,5 @@
 
-import NeuroverseBackendActor from '@/utils/NeuroverseBackendActor';
-import { aiService, mockAIService, type AgentConfig } from './aiService';
+import { aiService, type AgentConfig } from './aiService';
 import { agents } from '@/data/agents';
 
 interface ConversationMemory {
@@ -94,32 +93,12 @@ class ConversationService {
     };
     conversation.messages.push(userMessage);
 
-    // Get agent configuration
-    const agent = agents.find(a => a.id === agentId);
-    const agentConfig: AgentConfig = {
-      systemPrompt: agent?.system_prompt || 'You are a helpful AI assistant.',
-      temperature: 0.7,
-      maxTokens: 1000,
-      model: 'gpt-4o-mini'
-    };
-
-    // Generate AI response
-    const aiMessages = conversation.messages.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }));
-
     let aiResponse: string;
     try {
-      if (this.useRealAI) {
-        aiResponse = await aiService.generateResponse(aiMessages, agentConfig);
-      } else {
-        aiResponse = await mockAIService.generateResponse(aiMessages, agentConfig);
-      }
+      aiResponse = await aiService.generateResponse(agentId, message);
     } catch (error) {
       console.error('AI service error:', error);
-      // Fallback to mock service
-      aiResponse = await mockAIService.generateResponse(aiMessages, agentConfig);
+      aiResponse = 'Something went wrong. Please try again.'
     }
 
     const assistantMessage = {
@@ -134,8 +113,7 @@ class ConversationService {
     this.conversations.set(convId, conversation);
     this.saveConversations();
 
-    const llmCanisterResponse = await NeuroverseBackendActor.chatWithAgent(agentId, message);
-    console.log(llmCanisterResponse)
+
     return { response: aiResponse, conversationId: convId };
   }
 

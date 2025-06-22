@@ -97,13 +97,13 @@ const AgentDiscovery = () => {
 
             {/* Results Summary */}
             <p className="text-muted-foreground text-sm">
-              Found {filteredAndSortedAgents.length} agent{filteredAndSortedAgents.length !== 1 ? 's' : ''}
+              Found {filteredAndSortedAgents ? filteredAndSortedAgents.length : 0} agent{filteredAndSortedAgents?.length > 1 ? 's' : ''}
             </p>
           </div>
         </div>
 
         {/* Agent Grid/List */}
-        {filteredAndSortedAgents.length > 0 ? (
+        {filteredAndSortedAgents?.length > 0 ? (
           <div className={
             viewMode === 'grid'
               ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"

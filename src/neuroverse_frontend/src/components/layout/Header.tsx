@@ -1,8 +1,14 @@
 
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import useAuthModal from '@/hooks/use-auth-modal';
+import { useAuth } from '@/contexts/use-auth-client';
 
 const Header = () => {
+  const authModal = useAuthModal()
+  const { principal, isAuthenticated } = useAuth()
+  console.log(isAuthenticated)
+
   return (
     <header className="sticky top-0 z-50 w-full glassmorphic">
       <div className="container flex h-16 items-center justify-between">
@@ -31,9 +37,11 @@ const Header = () => {
           <Button variant="ghost" asChild>
             <Link to="/deploy">Deploy Agent</Link>
           </Button>
-          {/* <Button className="bg-neon-blue/80 text-black hover:bg-neon-blue font-bold">
-            Login
-          </Button> */}
+          <Button className="bg-neon-purple/80 text-white hover:bg-neon-purple font-bold"
+            onClick={() => authModal.setOpen(true)}
+          >
+            Connect / Create Wallet
+          </Button>
         </nav>
       </div>
     </header>

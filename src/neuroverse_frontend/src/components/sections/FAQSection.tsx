@@ -39,12 +39,12 @@ const FAQSection = () => {
           Everything you need to know about NeuroVerse and decentralized AI.
         </p>
       </div>
-      
+
       <div className="max-w-4xl mx-auto">
         <Accordion type="single" collapsible className="space-y-6">
           {faqs.map((faq, index) => (
             <AccordionItem key={index} value={`item-${index}`} className="glassmorphic border-neon-blue/20 rounded-lg px-6">
-              <AccordionTrigger className="text-left text-lg font-semibold hover:text-neon-blue transition-colors">
+              <AccordionTrigger className="text-left text-lg font-semibold hover:text-neon-blue transition-colors focus:outline-none focus:border-none">
                 {faq.question}
               </AccordionTrigger>
               <AccordionContent className="text-muted-foreground text-base leading-relaxed pt-2">

@@ -22,11 +22,12 @@ export const getIdentityProvider = () => {
         const isLocal = process.env.DFX_NETWORK !== "ic";
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         if (isLocal) {
-            if (isSafari) {
-                idpProvider = `http://localhost:4943?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY! || "umunu-kh777-77774-qaaca-cai"}`;
-            } else {
-                idpProvider = `http://${process.env.CANISTER_ID_INTERNET_IDENTITY! || "u6s2n-gx777-77774-qaaba-cai"}.localhost:4943`
-            }
+            // if (isSafari) {
+            //     idpProvider = `http://localhost:4943?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY! || "rdmx6-jaaaa-aaaaa-aaadq-cai"}`;
+            // } else {
+            //     idpProvider = `http://${process.env.CANISTER_ID_INTERNET_IDENTITY! || "rdmx6-jaaaa-aaaaa-aaadq-cai"}.localhost:4943`
+            // }
+            idpProvider = 'http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:4943'
         } else {
             idpProvider = `https://identity.ic0.app`;
         }
@@ -102,7 +103,7 @@ export const useAuthClient = (options = defaultOptions) => {
                     // Create an agent
                     const agent = await createAgent({
                         identity,
-                        host: development ? "http://localhost:4943" : "https:icp0.io",
+                        host: development ? "http://localhost:4943" : "https://icp0.io",
                     });
                     if (development) {
                         await agent.fetchRootKey();
@@ -117,15 +118,6 @@ export const useAuthClient = (options = defaultOptions) => {
                     })
 
                     setSignInMethod("Internet Identity")
-
-                    const loggedInUser = {
-                        principal: principal,
-                        role: "admin"
-                    }
-
-
-                    navigate("/account/admin")
-
                 },
             });
         }
@@ -248,8 +240,8 @@ export const useAuthClient = (options = defaultOptions) => {
 
         setWhoamiActor(actor);
 
-        // const whoAmI = await NeuroverseBackendActor.whoami();
-        // setWhoAmI(whoAmI);
+        const whoAmI = await NeuroverseBackendActor.whoami();
+        setWhoAmI(whoAmI);
 
     }
 
