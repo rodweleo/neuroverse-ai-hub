@@ -12,108 +12,31 @@ import { KnowledgeDocument } from './DocumentUpload';
 import { KnowledgeConfig } from './KnowledgeBaseManager';
 import useUserAgents from '@/hooks/useUserAgents';
 import { useAuth } from '@/contexts/use-auth-client';
-
-interface EnhancedAgent {
-  id: string;
-  name: string;
-  description: string;
-  role: string;
-  systemPrompt: string;
-  icon: string;
-  color: string;
-  pricing: number;
-  temperature: number;
-  maxTokens: number;
-  knowledgeBase: KnowledgeDocument[];
-  knowledgeConfig: KnowledgeConfig;
-  createdAt: Date;
-  lastModified: Date;
-  version: number;
-}
+import { Agent } from '../../../../declarations/neuroverse_backend/neuroverse_backend.did';
 
 const AgentManagementDashboard = () => {
   const { toast } = useToast();
   const { principal } = useAuth()
   const { data: userAgents } = useUserAgents(principal)
-  const [agents, setAgents] = useState<EnhancedAgent[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedAgent, setSelectedAgent] = useState<EnhancedAgent | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  useEffect(() => {
-    loadAgents();
-  }, []);
-
-  const loadAgents = () => {
-    const stored = localStorage.getItem('custom_agents');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        const agentsWithDates = parsed.map((agent: any) => ({
-          ...agent,
-          createdAt: new Date(agent.createdAt),
-          lastModified: new Date(agent.lastModified || agent.createdAt),
-          knowledgeBase: agent.knowledgeBase || [],
-          knowledgeConfig: agent.knowledgeConfig || {
-            maxContextLength: 4000,
-            searchSensitivity: 0.7,
-            citationsEnabled: true,
-            chunkSize: 1000,
-            overlap: 200
-          }
-        }));
-        setAgents(agentsWithDates);
-      } catch (error) {
-        console.error('Failed to load agents:', error);
-      }
-    }
-  };
-
-  const filteredAgents = agents.filter(agent =>
+  const filteredAgents = userAgents ? userAgents.filter(agent =>
     agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    agent.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    agent.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
     agent.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ) : [];
 
   const deleteAgent = (agentId: string) => {
-    const updatedAgents = agents.filter(agent => agent.id !== agentId);
-    setAgents(updatedAgents);
-    localStorage.setItem('custom_agents', JSON.stringify(updatedAgents));
-
     toast({
       title: "Agent Deleted",
-      description: "The agent has been successfully removed.",
+      description: `The agent ${agentId} has been successfully removed.`,
     });
   };
 
-  const duplicateAgent = (agent: EnhancedAgent) => {
-    const newAgent = {
-      ...agent,
-      id: Date.now().toString(),
-      name: `${agent.name} (Copy)`,
-      createdAt: new Date(),
-      lastModified: new Date(),
-      version: 1
-    };
+  const handleAgentUpdate = (updatedAgent: Agent) => {
 
-    const updatedAgents = [...agents, newAgent];
-    setAgents(updatedAgents);
-    localStorage.setItem('custom_agents', JSON.stringify(updatedAgents));
-
-    toast({
-      title: "Agent Duplicated",
-      description: `Created a copy of ${agent.name}`,
-    });
-  };
-
-  const handleAgentUpdate = (updatedAgent: EnhancedAgent) => {
-    const updatedAgents = agents.map(agent =>
-      agent.id === updatedAgent.id
-        ? { ...updatedAgent, lastModified: new Date(), version: agent.version + 1 }
-        : agent
-    );
-    setAgents(updatedAgents);
-    localStorage.setItem('custom_agents', JSON.stringify(updatedAgents));
     setEditDialogOpen(false);
     setSelectedAgent(null);
 
@@ -135,12 +58,12 @@ const AgentManagementDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="flex justify-between items-end h-60 bg-gradient-to-r from-neon-blue/30 to-neon-purple/30 p-6 rounded-lg shadow-lg">
         <div>
-          <h1 className="text-3xl font-orbitron font-bold holographic-text">
+          <h1 className="text-6xl font-orbitron font-bold holographic-text py-2">
             My Agents
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-lg text-muted-foreground">
             Manage and edit your deployed AI agents
           </p>
         </div>
@@ -156,12 +79,12 @@ const AgentManagementDashboard = () => {
             />
           </div>
           <Badge variant="outline" className="text-neon-blue">
-            {userAgents ? userAgents.length : 0} agent{filteredAgents.length !== 1 ? 's' : ''}
+            {userAgents ? userAgents.length : 0} agent{filteredAgents?.length !== 1 ? 's' : ''}
           </Badge>
         </div>
       </div>
 
-      {filteredAgents.length === 0 ? (
+      {filteredAgents?.length === 0 ? (
         <Card className="glassmorphic border-neon-blue/20">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Brain className="h-16 w-16 text-muted-foreground mb-4" />
@@ -183,13 +106,13 @@ const AgentManagementDashboard = () => {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-lg bg-background/50 ${agent.color}`}>
+                    <div className={`p-2 rounded-lg bg-background/50`}>
                       <Brain className="h-5 w-5" />
                     </div>
                     <div>
                       <CardTitle className="text-lg">{agent.name}</CardTitle>
                       <Badge variant="secondary" className="text-xs">
-                        {agent.role}
+                        {agent.category}
                       </Badge>
                     </div>
                   </div>
@@ -208,7 +131,7 @@ const AgentManagementDashboard = () => {
                       <span className="text-muted-foreground">Knowledge:</span>
                     </div>
                     <span className="font-medium text-neon-blue">
-                      {agent.knowledgeBase.length} document{agent.knowledgeBase.length !== 1 ? 's' : ''}
+
                     </span>
                   </div>
 
@@ -218,25 +141,16 @@ const AgentManagementDashboard = () => {
                       <span className="text-muted-foreground">Modified:</span>
                     </div>
                     <span className="font-medium">
-                      {formatDate(agent.lastModified)}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-border/50">
                   <span className="text-xs text-muted-foreground">
-                    v{agent.version}
+                    v
                   </span>
 
                   <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => duplicateAgent(agent)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
 
                     <Dialog open={editDialogOpen && selectedAgent?.id === agent.id} onOpenChange={setEditDialogOpen}>
                       <DialogTrigger asChild>

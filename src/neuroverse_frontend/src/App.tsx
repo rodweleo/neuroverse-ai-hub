@@ -13,6 +13,8 @@ import Layout from "./components/layout/Layout";
 import Providers from "./components/providers";
 import MainChatPage from "./pages/Chat/Index";
 import ChatPage from "./pages/Chat/c/[chatId]/page";
+import AccountModal from "./components/account/account-modal";
+import AuthModal from "./components/auth/auth-modal";
 
 const App = () => (
   <Providers>
@@ -33,6 +35,8 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <AuthModal />
+        <AccountModal />
       </Layout>
     </BrowserRouter>
   </Providers>

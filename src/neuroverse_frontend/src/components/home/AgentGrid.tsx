@@ -1,13 +1,15 @@
 
-import { agents } from '@/data/agents';
 import EnhancedAgentCard from '@/components/marketplace/EnhancedAgentCard';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import useAllAgents from '@/hooks/useAllAgents';
 
 const AgentGrid = () => {
+  const { data: agents } = useAllAgents()
+
   // Show only first 3 agents on home page
-  const featuredAgents = agents.slice(0, 3);
+  const featuredAgents = agents ? agents.slice(0, 3) : [];
 
   return (
     <div>
@@ -20,6 +22,9 @@ const AgentGrid = () => {
         </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {featuredAgents.length === 0 && <div className="">
+          No live agents found! Apologies partner :|
+        </div>}
         {featuredAgents.map((agent) => (
           <EnhancedAgentCard key={agent.id} agent={agent} />
         ))}

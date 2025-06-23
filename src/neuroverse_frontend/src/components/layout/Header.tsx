@@ -2,12 +2,16 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import useAuthModal from '@/hooks/use-auth-modal';
+import useAccountModal from '@/hooks/use-account-modal';
 import { useAuth } from '@/contexts/use-auth-client';
+import { CircleUserRound } from "lucide-react"
 
 const Header = () => {
   const authModal = useAuthModal()
-  const { principal, isAuthenticated } = useAuth()
-  console.log(isAuthenticated)
+  const accountModal = useAccountModal()
+  const { principal } = useAuth()
+
+  const principalString = principal?.toString()
 
   return (
     <header className="sticky top-0 z-50 w-full glassmorphic">
@@ -27,21 +31,21 @@ const Header = () => {
           </Button>
         </nav>
         <nav className="flex items-center gap-4">
-
           <Button variant="ghost" asChild>
-            <Link to="/agents">My Agents</Link>
+            <Link to="/deploy">Deploy Your Agent</Link>
           </Button>
-          <Button variant="ghost" asChild>
-            <Link to="/dashboard">Dashboard</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link to="/deploy">Deploy Agent</Link>
-          </Button>
-          <Button className="bg-neon-purple/80 text-white hover:bg-neon-purple font-bold"
-            onClick={() => authModal.setOpen(true)}
-          >
-            Connect / Create Wallet
-          </Button>
+          {
+            principal ? <Button className="bg-neon-purple/80 text-white hover:bg-neon-purple font-bold flex items-center gap-2" onClick={() => accountModal.setOpen(true)}>
+              <CircleUserRound />
+              <span>{principalString.slice(0, 8) + "..." + principalString.slice(principalString.length - 8, principalString.length)}</span>
+            </Button>
+              :
+              <Button className="bg-neon-purple/80 text-white hover:bg-neon-purple font-bold"
+                onClick={() => authModal.setOpen(true)}
+              >
+                Connect / Create Wallet
+              </Button>
+          }
         </nav>
       </div>
     </header>

@@ -1,35 +1,35 @@
 
-import AgentGrid from "@/components/home/AgentGrid";
 import HolographicRobot3D from "@/components/hero/HolographicRobot3D";
 import ServicesSection from "@/components/sections/ServicesSection";
 import HowToUseSection from "@/components/sections/HowToUseSection";
-import StatsSection from "@/components/sections/StatsSection";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import FAQSection from "@/components/sections/FAQSection";
 import ComparisonSection from "@/components/sections/ComparisonSection";
-import ActivityFeedSection from "@/components/sections/ActivityFeedSection";
 import NewsletterSection from "@/components/sections/NewsletterSection";
-import TryDemoSection from "@/components/home/TryDemoSection";
 import { Button } from "@/components/ui/button";
-import { Rocket, Play, Zap, Star, Users, Shield } from "lucide-react";
+import { Rocket, Play, Zap, Users, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Suspense, lazy } from "react";
+import useAllAgentVendors from "@/hooks/useAllAgentVendors";
 
 // Lazy load heavy components
 const LazyAgentGrid = lazy(() => import("@/components/home/AgentGrid"));
 
 const Index = () => {
+
+  const { data: agentVendors } = useAllAgentVendors()
+
   return (
     <div className="space-y-20">
+      {/* Background Effects
+      <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/5 via-neon-purple/5 to-acid-green/5"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(0,240,255,0.15),transparent_50%)]"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(155,93,229,0.15),transparent_50%)]"></div> */}
+
       {/* Immersive Hero Section */}
-      <div className="relative min-h-screen flex items-center justify-center overflow-hidden rounded-lg">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/5 via-neon-purple/5 to-acid-green/5"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(0,240,255,0.15),transparent_50%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(155,93,229,0.15),transparent_50%)]"></div>
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden rounded-lg  ">
 
-
-        <div className="relative z-10">
+        <div className="relative z-10 container">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div className="space-y-8 lg:pr-8">
@@ -42,11 +42,11 @@ const Index = () => {
               {/* Main Heading */}
               <div className="space-y-6">
                 <h1 className="text-5xl md:text-7xl lg:text-8xl font-orbitron font-bold leading-tight">
-                  <span className="block holographic-text animate-text-glow">NeuroVerse</span>
+                  <span className="block">NeuroVerse</span>
                   <span className="block text-white mt-2">AI Agents</span>
                 </h1>
 
-                <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed">
+                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
                   Explore a decentralized universe of AI agents. Interact with them, deploy your own,
                   and shape the future of intelligence on the blockchain.
                 </p>
@@ -113,26 +113,26 @@ const Index = () => {
               </div>
 
               {/* Social Proof */}
-              <div className="flex items-center space-x-6 pt-4">
-                <div className="flex items-center space-x-2">
-                  <div className="flex -space-x-2">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-r from-neon-blue to-neon-purple border-2 border-background flex items-center justify-center">
-                        <Users className="h-4 w-4 text-white" />
+              {
+                agentVendors ? agentVendors.length > 5 ?
+                  <div className="flex items-center space-x-6 pt-4">
+                    <div className="flex items-center space-x-2">
+
+                      <div className="flex -space-x-2">
+                        {[...Array(4)].map((_, i) => (
+                          <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-r from-neon-blue to-neon-purple border-2 border-background flex items-center justify-center">
+                            <Users className="h-4 w-4 text-white" />
+                          </div>
+                        ))}
                       </div>
-                    ))}
+
+                      < div className="text-sm text-muted-foreground">
+                        <span className="text-white font-semibold">12,400+</span> creators
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    <span className="text-white font-semibold">12,400+</span> creators
-                  </div>
-                </div>
-                <div className="flex items-center space-x-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-acid-green fill-current" />
-                  ))}
-                  <span className="text-sm text-muted-foreground ml-2">4.9/5 rating</span>
-                </div>
-              </div>
+                  : "" : ""
+              }
             </div>
 
             {/* Right Content - 3D Robot */}
@@ -168,13 +168,10 @@ const Index = () => {
           <div className="absolute bottom-1/3 left-1/2 w-2 h-2 bg-acid-green rounded-full animate-pulse opacity-50 animation-delay-2000"></div>
           <div className="absolute top-2/3 right-1/4 w-1 h-1 bg-neon-blue rounded-full animate-pulse opacity-70 animation-delay-1000"></div>
         </div>
+
+        <div className="bg-black h-full w-full inset-0 absolute" />
       </div>
 
-      {/* Live Statistics */}
-      <StatsSection />
-
-      {/* Try Demo Section - New Addition */}
-      <TryDemoSection />
 
       {/* Services Section */}
       <ServicesSection />
@@ -214,9 +211,6 @@ const Index = () => {
         </Suspense>
       </div>
 
-      {/* Real-time Activity Feed */}
-      <ActivityFeedSection />
-
       {/* Testimonials */}
       <TestimonialsSection />
 
@@ -225,7 +219,7 @@ const Index = () => {
 
       {/* FAQ Section */}
       <FAQSection />
-    </div>
+    </div >
   );
 };
 

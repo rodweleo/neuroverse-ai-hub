@@ -11,19 +11,23 @@ import { Rocket, Brain, Stethoscope, GraduationCap, Bot, Palette, Code, Heart, S
 import { useToast } from '@/hooks/use-toast';
 import KnowledgeBaseManager, { KnowledgeConfig } from './KnowledgeBaseManager';
 import { KnowledgeDocument } from './DocumentUpload';
+import NeuroverseBackendActor from "@/utils/NeuroverseBackendActor"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Loader2 } from "lucide-react"
 
 interface AgentFormData {
   name: string;
   description: string;
-  role: string;
+  category: string;
   systemPrompt: string;
   icon: string;
   color: string;
-  pricing: number;
+  price: number;
   temperature: number;
   maxTokens: number;
   knowledgeBase: KnowledgeDocument[];
   knowledgeConfig: KnowledgeConfig;
+  isFree: boolean;
 }
 
 const AgentCreationForm = () => {
@@ -31,11 +35,11 @@ const AgentCreationForm = () => {
   const [formData, setFormData] = useState<AgentFormData>({
     name: '',
     description: '',
-    role: '',
+    category: '',
     systemPrompt: '',
     icon: 'Bot',
     color: 'text-neon-blue',
-    pricing: 0.1,
+    price: 0.1,
     temperature: 0.7,
     maxTokens: 1000,
     knowledgeBase: [],
@@ -45,8 +49,10 @@ const AgentCreationForm = () => {
       citationsEnabled: true,
       chunkSize: 1000,
       overlap: 200
-    }
+    },
+    isFree: true
   });
+  const [isLoading, setIsLoading] = useState(false)
 
   const iconOptions = [
     { value: 'Bot', label: 'Bot', icon: Bot },
@@ -106,53 +112,65 @@ const AgentCreationForm = () => {
   const handleTemplateSelect = (template: typeof roleTemplates[0]) => {
     setFormData(prev => ({
       ...prev,
-      role: template.role,
+      category: template.role,
       systemPrompt: template.prompt,
       icon: template.icon,
       color: template.color
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true)
 
-    if (!formData.name || !formData.description || !formData.systemPrompt) {
+    if (!formData.name || !formData.description || !formData.systemPrompt || !formData.price) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields.",
+        description: `Please fill in all required fields: Name, Description, System Prompt, Category, Price`,
         variant: "destructive"
       });
+      setIsLoading(false)
       return;
     }
 
-    // Enhanced agent data with knowledge base
-    const agentData = {
-      ...formData,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-      lastModified: new Date(),
-      version: 1,
-    };
+    try {
+      await NeuroverseBackendActor.createAgent(
+        Date.now().toString(),
+        formData.name,
+        formData.category,
+        formData.description,
+        formData.systemPrompt,
+        formData.isFree,
+        BigInt(formData.price)
+      );
 
-    // Save to local storage for demo
-    const existingAgents = JSON.parse(localStorage.getItem('custom_agents') || '[]');
-    existingAgents.push(agentData);
-    localStorage.setItem('custom_agents', JSON.stringify(existingAgents));
+      toast({
+        title: "Agent Created Successfully!",
+        description: `${formData.name} has been deployed on the NeuroVerse.`,
+      });
 
-    toast({
-      title: "Agent Created Successfully!",
-      description: `${formData.name} has been deployed to the NeuroVerse with ${formData.knowledgeBase.length} knowledge documents.`,
-    });
+      setIsLoading(false)
+    } catch (e) {
+      console.log(e)
+      toast({
+        title: "Agent creation error",
+        description: "Something went wrong!",
+        variant: "destructive"
+      })
+      setIsLoading(false)
+    } finally {
+      setIsLoading(false)
+    }
 
     // Reset form
     setFormData({
       name: '',
       description: '',
-      role: '',
+      category: '',
       systemPrompt: '',
       icon: 'Bot',
       color: 'text-neon-blue',
-      pricing: 0.1,
+      price: 0.1,
       temperature: 0.7,
       maxTokens: 1000,
       knowledgeBase: [],
@@ -162,7 +180,8 @@ const AgentCreationForm = () => {
         citationsEnabled: true,
         chunkSize: 1000,
         overlap: 200
-      }
+      },
+      isFree: true
     });
   };
 
@@ -195,10 +214,10 @@ const AgentCreationForm = () => {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="basic" className="space-y-6 mt-6">
+              <TabsContent value="basic" className="space-y-6 mt-6 outline-none focus:outline-none focus:border-none">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-lg font-bold holographic-text">
+                    <Label htmlFor="name" className="text-lg font-bold">
                       Agent Name *
                     </Label>
                     <Input
@@ -211,13 +230,13 @@ const AgentCreationForm = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="role" className="text-lg font-bold holographic-text">
+                    <Label htmlFor="role" className="text-lg font-bold ">
                       Role/Category
                     </Label>
                     <Input
                       id="role"
-                      value={formData.role}
-                      onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
+                      value={formData.category}
+                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                       placeholder="e.g., Therapist, Tutor, Assistant"
                       className="bg-black/20 focus:ring-neon-blue"
                     />
@@ -225,7 +244,7 @@ const AgentCreationForm = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-lg font-bold holographic-text">
+                  <Label htmlFor="description" className="text-lg font-bold">
                     Description *
                   </Label>
                   <Input
@@ -238,7 +257,7 @@ const AgentCreationForm = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="systemPrompt" className="text-lg font-bold holographic-text">
+                  <Label htmlFor="systemPrompt" className="text-lg font-bold ">
                     System Prompt *
                   </Label>
                   <Textarea
@@ -252,6 +271,25 @@ const AgentCreationForm = () => {
                   <p className="text-sm text-muted-foreground">
                     This defines your agent's personality and behavior. Be specific about tone, expertise, and interaction style.
                   </p>
+                </div>
+
+                <div className="flex gap-2 -space-y-[6px]">
+                  <Checkbox
+                    defaultChecked
+                    onCheckedChange={(checked) => {
+                      setFormData(prev => ({ ...prev, isFree: checked as boolean }))
+                    }}
+                    className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-neon-purple data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
+                  />
+                  <div className="">
+                    <Label htmlFor="systemPrompt" className="text-lg font-bold ">
+                      Enable Fremium Agent Subscription *
+                    </Label>
+
+                    <p className="text-sm text-muted-foreground">
+                      This defines your agent's accessibility. This depicts if it will be a fremium subscription or charged.
+                    </p>
+                  </div>
                 </div>
               </TabsContent>
 
@@ -267,7 +305,7 @@ const AgentCreationForm = () => {
               <TabsContent value="advanced" className="space-y-6 mt-6">
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-lg font-bold holographic-text">Icon</Label>
+                    <Label className="text-lg font-bold">Icon</Label>
                     <Select value={formData.icon} onValueChange={(value) => setFormData(prev => ({ ...prev, icon: value }))}>
                       <SelectTrigger className="bg-black/20">
                         <SelectValue />
@@ -286,7 +324,7 @@ const AgentCreationForm = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-lg font-bold holographic-text">Theme Color</Label>
+                    <Label className="text-lg font-bold">Theme Color</Label>
                     <Select value={formData.color} onValueChange={(value) => setFormData(prev => ({ ...prev, color: value }))}>
                       <SelectTrigger className="bg-black/20">
                         <SelectValue />
@@ -305,7 +343,7 @@ const AgentCreationForm = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="temperature" className="text-lg font-bold holographic-text">
+                    <Label htmlFor="temperature" className="text-lg font-bold">
                       Creativity (0-1)
                     </Label>
                     <Input
@@ -321,7 +359,7 @@ const AgentCreationForm = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="pricing" className="text-lg font-bold holographic-text">
+                    <Label htmlFor="pricing" className="text-lg font-bold">
                       Price (ICP)
                     </Label>
                     <Input
@@ -329,8 +367,8 @@ const AgentCreationForm = () => {
                       type="number"
                       step="0.01"
                       min="0"
-                      value={formData.pricing}
-                      onChange={(e) => setFormData(prev => ({ ...prev, pricing: parseFloat(e.target.value) || 0 }))}
+                      value={formData.price}
+                      onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
                       className="bg-black/20 focus:ring-neon-blue"
                     />
                   </div>
@@ -341,9 +379,12 @@ const AgentCreationForm = () => {
             <Button
               type="submit"
               size="lg"
-              className="w-full font-bold bg-neon-purple/80 hover:bg-neon-purple text-white"
+              className="w-full font-bold bg-neon-purple/80 hover:bg-neon-purple text-white disabled:bg-slate-300"
+              disabled={isLoading}
             >
-              <Rocket className="mr-2 h-5 w-5" />
+              {isLoading ? <Loader2 className="animate-spin" />
+                :
+                <Rocket className="h-5 w-5" />}
               Deploy Agent to NeuroVerse
             </Button>
           </form>
@@ -369,7 +410,7 @@ const AgentCreationForm = () => {
               >
                 <div className="w-full">
                   <div className="font-bold mb-1">{template.role}</div>
-                  <div className="text-sm text-muted-foreground overflow-hidden text-ellipsis line-clamp-3">
+                  <div className="text-sm text-muted-foreground break-normal whitespace-normal">
                     {template.prompt}
                   </div>
                 </div>

@@ -9,33 +9,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, FileText, Brain, Save, X } from 'lucide-react';
 import KnowledgeBaseManager, { KnowledgeConfig } from './KnowledgeBaseManager';
 import { KnowledgeDocument } from './DocumentUpload';
-
-interface EnhancedAgent {
-  id: string;
-  name: string;
-  description: string;
-  role: string;
-  systemPrompt: string;
-  icon: string;
-  color: string;
-  pricing: number;
-  temperature: number;
-  maxTokens: number;
-  knowledgeBase: KnowledgeDocument[];
-  knowledgeConfig: KnowledgeConfig;
-  createdAt: Date;
-  lastModified: Date;
-  version: number;
-}
+import { Agent } from '../../../../declarations/neuroverse_backend/neuroverse_backend.did';
 
 interface AgentEditFormProps {
-  agent: EnhancedAgent;
-  onSave: (agent: EnhancedAgent) => void;
+  agent: Agent;
+  onSave: (agent: Agent) => void;
   onCancel: () => void;
 }
 
 const AgentEditForm = ({ agent, onSave, onCancel }: AgentEditFormProps) => {
-  const [formData, setFormData] = useState<EnhancedAgent>(agent);
+  const [formData, setFormData] = useState<Agent>(agent);
 
   const iconOptions = [
     { value: 'Bot', label: 'Bot' },
@@ -96,7 +79,7 @@ const AgentEditForm = ({ agent, onSave, onCancel }: AgentEditFormProps) => {
               </Label>
               <Input
                 id="edit-role"
-                value={formData.role}
+                value={formData.category}
                 onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
                 className="bg-background/50"
               />
@@ -121,7 +104,7 @@ const AgentEditForm = ({ agent, onSave, onCancel }: AgentEditFormProps) => {
             </Label>
             <Textarea
               id="edit-systemPrompt"
-              value={formData.systemPrompt}
+              value={formData.system_prompt}
               onChange={(e) => setFormData(prev => ({ ...prev, systemPrompt: e.target.value }))}
               rows={6}
               className="bg-background/50"
@@ -200,7 +183,7 @@ const AgentEditForm = ({ agent, onSave, onCancel }: AgentEditFormProps) => {
                 type="number"
                 step="0.01"
                 min="0"
-                value={formData.pricing}
+                value={Number(formData.price)}
                 onChange={(e) => setFormData(prev => ({ ...prev, pricing: parseFloat(e.target.value) || 0 }))}
                 className="bg-background/50"
               />

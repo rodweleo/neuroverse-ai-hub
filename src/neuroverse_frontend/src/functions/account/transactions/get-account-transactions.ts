@@ -46,7 +46,7 @@ export const getAccountTransactions = async (accountIdentifier: string) => {
         return response.transactions
 
     } catch (e) {
-        console.error("Error while retrieving the ICP account transactions.")
+        console.error("Error while retrieving the ICP account transactions:" + e)
         return []
     }
 }

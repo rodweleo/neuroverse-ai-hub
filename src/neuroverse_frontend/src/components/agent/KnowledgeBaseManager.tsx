@@ -56,7 +56,7 @@ const KnowledgeBaseManager = ({
         <CardHeader>
           <div className="flex items-center space-x-2">
             <Brain className="h-5 w-5 text-neon-blue" />
-            <CardTitle className="holographic-text">Knowledge Base</CardTitle>
+            <CardTitle>Knowledge Base</CardTitle>
           </div>
           <CardDescription>
             Upload documents to enhance your agent's knowledge and capabilities
@@ -80,7 +80,7 @@ const KnowledgeBaseManager = ({
                 documents={documents}
                 onDocumentsChange={onDocumentsChange}
               />
-              
+
               {documents.length > 0 && (
                 <div className="grid grid-cols-3 gap-4 p-4 bg-background/20 rounded-lg">
                   <div className="text-center">

@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import ContinuenWithIcpAuthenticatorBtn from "./continue-with-icp-authenticator-btn";
+import ContinueWithIcpAuthenticatorBtn from "./continue-with-icp-authenticator-btn";
 
 export default function AuthForm() {
     return (
@@ -9,7 +9,7 @@ export default function AuthForm() {
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col items-center gap-4">
-                    <ContinuenWithIcpAuthenticatorBtn />
+                    <ContinueWithIcpAuthenticatorBtn />
                 </div>
             </CardContent>
             <CardFooter>

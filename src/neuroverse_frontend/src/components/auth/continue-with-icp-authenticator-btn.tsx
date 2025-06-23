@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/use-auth-client";
 import { Button } from "@/components/ui/button";
 
-export default function ContinuenWithIcpAuthenticatorBtn() {
+export default function ContinueWithIcpAuthenticatorBtn() {
     const { signInWithIcpAuthenticator } = useAuth();
 
     return (

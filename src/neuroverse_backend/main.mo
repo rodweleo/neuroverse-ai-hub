@@ -30,6 +30,17 @@ actor NeuroVerse {
     await LLM.prompt(#Llama3_1_8B, prompt);
   };
 
+  public func example() : async Text {
+    await LLM.chat(#Llama3_1_8B).withMessages([
+      #system_ {
+        content = "You are a helpful assistant.";
+      },
+      #user {
+        content = "What's the weather in San Francisco?";
+      },
+    ]).send();
+  };
+
   public func chat(messages : [LLM.ChatMessage]) : async Text {
     await LLM.chat(
       #Llama3_1_8B,
