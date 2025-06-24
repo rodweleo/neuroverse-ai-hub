@@ -30,17 +30,6 @@ actor NeuroVerse {
     await LLM.prompt(#Llama3_1_8B, prompt);
   };
 
-  public func example() : async Text {
-    await LLM.chat(#Llama3_1_8B).withMessages([
-      #system_ {
-        content = "You are a helpful assistant.";
-      },
-      #user {
-        content = "What's the weather in San Francisco?";
-      },
-    ]).send();
-  };
-
   public func chat(messages : [LLM.ChatMessage]) : async Text {
     await LLM.chat(
       #Llama3_1_8B,
@@ -59,8 +48,7 @@ actor NeuroVerse {
     );
   };
 
-  public func createAgent(agentId : Text, name : Text, category : Text, description : Text, system_prompt : Text, isFree : Bool, price : Nat) : async () {
-    let caller = Principal.fromActor(NeuroVerse);
+  public func createAgent(agentId : Text, name : Text, category : Text, description : Text, system_prompt : Text, isFree : Bool, price : Nat, vendor: Principal) : async () {
 
     let agent : Types.Agent = {
       id = agentId;
@@ -70,20 +58,20 @@ actor NeuroVerse {
       system_prompt = system_prompt;
       isFree = isFree;
       price = price;
-      created_by = caller;
+      created_by = vendor;
     };
 
     // Store in global agents map
     agents.put(agentId, agent);
 
     // Get or create the user's agent map
-    let agentsMap = switch (userAgents.get(caller)) {
+    let agentsMap = switch (userAgents.get(vendor)) {
       case (?map) map;
       case null HashMap.HashMap<Text, Types.Agent>(5, Text.equal, Text.hash);
     };
 
     agentsMap.put(agentId, agent);
-    userAgents.put(caller, agentsMap);
+    userAgents.put(vendor, agentsMap);
   };
 
   public func getAllAgents() : async [Types.Agent] {

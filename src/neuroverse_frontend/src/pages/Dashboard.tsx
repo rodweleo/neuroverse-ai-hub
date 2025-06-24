@@ -1,27 +1,16 @@
 
-import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Brain, TrendingUp, DollarSign, Users, Plus, Star } from "lucide-react";
+import { Brain, TrendingUp, DollarSign, Users, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
-import { analyticsService, type AgentUsage, type UserStats } from '@/services/analyticsService';
-import { agents } from '@/data/agents';
+import { useAuth } from "@/contexts/use-auth-client"
+import useUserAgents from '@/hooks/useUserAgents';
 
 const Dashboard = () => {
-  const [userStats, setUserStats] = useState<UserStats | null>(null);
-  const [agentUsages, setAgentUsages] = useState<AgentUsage[]>([]);
+  const { principal } = useAuth()
+  const { data: userAgents } = useUserAgents(principal)
 
-  useEffect(() => {
-    // Load analytics data
-    setUserStats(analyticsService.getUserStats());
-    setAgentUsages(analyticsService.getAllAgentUsage());
-  }, []);
-
-  const getAgentName = (agentId: string) => {
-    return agents.find(agent => agent.id === agentId)?.name || agentId;
-  };
 
   return (
     <div className="container py-8 space-y-8">
@@ -50,7 +39,7 @@ const Dashboard = () => {
             <Brain className="h-4 w-4 text-neon-blue" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{userStats?.totalAgents || 0}</div>
+            <div className="text-2xl font-bold">{userAgents?.length}</div>
             <p className="text-xs text-muted-foreground">
               Active AI agents
             </p>
@@ -63,7 +52,7 @@ const Dashboard = () => {
             <Users className="h-4 w-4 text-neon-purple" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{userStats?.totalInteractions || 0}</div>
+            <div className="text-2xl font-bold">{0}</div>
             <p className="text-xs text-muted-foreground">
               User conversations
             </p>
@@ -76,7 +65,7 @@ const Dashboard = () => {
             <DollarSign className="h-4 w-4 text-acid-green" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{userStats?.totalEarnings.toFixed(1) || 0} ICP</div>
+            <div className="text-2xl font-bold">{0} ICP</div>
             <p className="text-xs text-muted-foreground">
               Revenue generated
             </p>
@@ -89,7 +78,7 @@ const Dashboard = () => {
             <TrendingUp className="h-4 w-4 text-neon-blue" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-bold">{getAgentName(userStats?.topAgent || '')}</div>
+            <div className="text-lg font-bold">{0}</div>
             <p className="text-xs text-muted-foreground">
               Most interactions
             </p>
@@ -114,7 +103,7 @@ const Dashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {agentUsages.length > 0 ? (
+              {/* {agentUsages.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -150,11 +139,13 @@ const Dashboard = () => {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No agent interactions yet. Start chatting with agents to see analytics!</p>
-                </div>
-              )}
+               
+              )} */}
+
+              <div className="text-center py-12 text-muted-foreground">
+                <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No agent interactions yet. Start chatting with agents to see analytics!</p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -168,7 +159,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {agentUsages.map((usage) => (
+                  {/* {agentUsages.map((usage) => (
                     <div key={usage.agentId} className="flex items-center justify-between">
                       <span className="font-medium">{getAgentName(usage.agentId)}</span>
                       <div className="flex items-center gap-2">
@@ -183,7 +174,7 @@ const Dashboard = () => {
                         <span className="text-sm text-muted-foreground">{usage.interactions}</span>
                       </div>
                     </div>
-                  ))}
+                  ))} */}
                 </div>
               </CardContent>
             </Card>
@@ -195,7 +186,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {agentUsages.map((usage) => (
+                  {/* {agentUsages.map((usage) => (
                     <div key={usage.agentId} className="flex items-center justify-between">
                       <span className="font-medium">{getAgentName(usage.agentId)}</span>
                       <div className="flex items-center gap-2">
@@ -210,7 +201,7 @@ const Dashboard = () => {
                         <span className="text-sm font-bold">{usage.earnings.toFixed(1)} ICP</span>
                       </div>
                     </div>
-                  ))}
+                  ))} */}
                 </div>
               </CardContent>
             </Card>
@@ -229,13 +220,13 @@ const Dashboard = () => {
               <div className="grid md:grid-cols-3 gap-6 mb-6">
                 <div className="text-center p-4 bg-acid-green/10 rounded-lg">
                   <div className="text-2xl font-bold text-acid-green">
-                    {userStats?.totalEarnings.toFixed(2) || 0} ICP
+                    {0} ICP
                   </div>
                   <div className="text-sm text-muted-foreground">Total Earned</div>
                 </div>
                 <div className="text-center p-4 bg-neon-blue/10 rounded-lg">
                   <div className="text-2xl font-bold text-neon-blue">
-                    {agentUsages.length > 0 ? (userStats?.totalEarnings / agentUsages.length).toFixed(2) : 0} ICP
+                    {0} ICP
                   </div>
                   <div className="text-sm text-muted-foreground">Avg per Agent</div>
                 </div>

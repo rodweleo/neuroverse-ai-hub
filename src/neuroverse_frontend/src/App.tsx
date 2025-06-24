@@ -15,29 +15,32 @@ import MainChatPage from "./pages/Chat/Index";
 import ChatPage from "./pages/Chat/c/[chatId]/page";
 import AccountModal from "./components/account/account-modal";
 import AuthModal from "./components/auth/auth-modal";
+import { AuthProvider } from "@/contexts/use-auth-client"
 
 const App = () => (
   <Providers>
     <Toaster />
     <Sonner />
     <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/deploy" element={<DeployAgentPage />} />
-          <Route path="/agents" element={<AgentManagementPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/chat" element={<MainChatPage />}>
-            <Route path="c/:chatId" element={<ChatPage />} />
-          </Route>
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <AuthModal />
-        <AccountModal />
-      </Layout>
+      <AuthProvider>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/deploy" element={<DeployAgentPage />} />
+            <Route path="/agents" element={<AgentManagementPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/chat" element={<MainChatPage />}>
+              <Route path="c/:chatId" element={<ChatPage />} />
+            </Route>
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <AuthModal />
+          <AccountModal />
+        </Layout>
+      </AuthProvider>
     </BrowserRouter>
   </Providers>
 );

@@ -14,6 +14,8 @@ import { KnowledgeDocument } from './DocumentUpload';
 import NeuroverseBackendActor from "@/utils/NeuroverseBackendActor"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2 } from "lucide-react"
+import { useAuth } from "@/contexts/use-auth-client"
+import AuthBtn from '@/components/auth/auth-btn';
 
 interface AgentFormData {
   name: string;
@@ -31,6 +33,7 @@ interface AgentFormData {
 }
 
 const AgentCreationForm = () => {
+  const { principal, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [formData, setFormData] = useState<AgentFormData>({
     name: '',
@@ -141,7 +144,8 @@ const AgentCreationForm = () => {
         formData.description,
         formData.systemPrompt,
         formData.isFree,
-        BigInt(formData.price)
+        BigInt(formData.price),
+        principal
       );
 
       toast({
@@ -376,17 +380,20 @@ const AgentCreationForm = () => {
               </TabsContent>
             </Tabs>
 
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full font-bold bg-neon-purple/80 hover:bg-neon-purple text-white disabled:bg-slate-300"
-              disabled={isLoading}
-            >
-              {isLoading ? <Loader2 className="animate-spin" />
-                :
-                <Rocket className="h-5 w-5" />}
-              Deploy Agent to NeuroVerse
-            </Button>
+            {isAuthenticated ?
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full font-bold bg-neon-purple/80 hover:bg-neon-purple text-white disabled:bg-slate-300"
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="animate-spin" />
+                  :
+                  <Rocket className="h-5 w-5" />}
+                Deploy Agent to NeuroVerse
+              </Button>
+              :
+              <AuthBtn className="w-full" />}
           </form>
         </CardContent>
       </Card>

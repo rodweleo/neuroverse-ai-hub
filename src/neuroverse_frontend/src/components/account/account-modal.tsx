@@ -63,7 +63,7 @@ export default function AccountModal() {
                 <ul className="w-full flex flex-col *:w-full space-y-2">
                     {accountLinks.map((link, idx) => {
                         return <li className="w-full" id={`account_link_${idx}`}>
-                            <Link to={link.href}>
+                            <Link to={link.href} onClick={() => setOpen(false)}>
                                 <Button className="bg-slate-800 hover:bg-slate-700 text-slate-400 w-full flex items-center justify-start">
                                     <link.icon /> {link.label}
                                 </Button>
