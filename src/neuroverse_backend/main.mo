@@ -1,6 +1,4 @@
 import LLM "mo:llm";
-import Model "mo:llm";
-import ChatMessage "mo:llm";
 import HashMap "mo:base/HashMap";
 import Types "types";
 import Principal "mo:base/Principal";
@@ -8,6 +6,7 @@ import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Array "mo:base/Array";
 import Time "mo:base/Time";
+import Int "mo:base/Int";
 
 actor NeuroVerse {
 
@@ -48,7 +47,7 @@ actor NeuroVerse {
     );
   };
 
-  public func createAgent(agentId : Text, name : Text, category : Text, description : Text, system_prompt : Text, isFree : Bool, price : Nat, vendor: Principal) : async () {
+  public func createAgent(agentId : Text, name : Text, category : Text, description : Text, system_prompt : Text, isFree : Bool, price : Nat, vendor : Principal) : async () {
 
     let agent : Types.Agent = {
       id = agentId;
@@ -143,6 +142,28 @@ actor NeuroVerse {
           Array.append(history, [userMessage]);
         };
 
+        // Convert the array of Message objects to a string
+        let historyAsText = Text.join(
+          "\n", // separator between messages
+          Array.map<Types.Message, Text>(
+            fullHistory,
+            func(msg : Types.Message) : Text {
+              // Convert each Message object to a string representation
+              let roleText = switch (msg.role) {
+                case (#system_) "System";
+                case (#user) "User";
+                case (#assistant) "Assistant";
+              };
+
+              // Combine the fields into a single string for each message
+              roleText # ": " # msg.content # " (at " # Int.toText(msg.timestamp) # ")";
+            },
+          ).vals(),
+        );
+
+        // Now you can concatenate with other text if needed
+        let finalPrompt = "Conversation history:\n" # historyAsText # "User prompt:" # prompt;
+
         // Call the LLM with the full context
         let response = await LLM.chat(
           #Llama3_1_8B,
@@ -155,7 +176,7 @@ actor NeuroVerse {
             // This assumes the last message is what we want to send
             {
               role = #user;
-              content = prompt;
+              content = finalPrompt;
             },
           ],
         );

@@ -6,9 +6,18 @@ import {
 } from "@/components/ui/dialog"
 import useAuthModal from "@/hooks/use-auth-modal"
 import AuthForm from "./auth-form"
+import { useAuth } from "@/contexts/use-auth-client"
+import { useEffect } from "react"
 
 export default function AuthModal() {
     const { isOpen, setOpen } = useAuthModal()
+    const { isAuthenticated, principal } = useAuth()
+
+    useEffect(() => {
+        if(isOpen && isAuthenticated && principal){
+            setOpen(false)
+        }
+    }, [isAuthenticated, principal, isOpen])
 
     return (
         <Dialog

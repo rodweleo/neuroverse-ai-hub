@@ -35,6 +35,7 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
         content: `Hello! I'm ${agent.name}, your ${agent.category}. How can I help you today?`,
         timestamp: new Date()
       };
+
       setMessages([greeting]);
     } else {
       // Reset conversation when modal closes
@@ -121,15 +122,15 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-2xl h-full max-h-[700px] glassmorphic border-neon-blue/20 flex flex-col">
+      <DialogContent className="max-w-2xl h-full max-h-[80vh] glassmorphic border-neon-blue/20 flex flex-col">
         <DialogHeader className="h-fit">
           <DialogTitle className="flex items-center gap-3">
-            <span className="holographic-text">{agent.name}</span>
+            <span className="holographic-text text-xl">{agent.name}</span>
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col flex-1">
-          <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
+          <ScrollArea className="flex-1 pr-4 overflow-y-auto max-h-[65vh]" ref={scrollAreaRef}>
             <div className="space-y-4">
               {messages.map((message) => (
                 <div

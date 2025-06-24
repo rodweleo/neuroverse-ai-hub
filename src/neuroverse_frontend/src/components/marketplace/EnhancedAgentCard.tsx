@@ -7,6 +7,7 @@ import ChatModal from '@/components/chat/ChatModal';
 import AgentPreview from './AgentPreview';
 import { Agent } from '../../../../declarations/neuroverse_backend/neuroverse_backend.did';
 import { Badge } from "@/components/ui/badge"
+import PayWithPlugWalletBtn from "@/components/transactions/PayWithPlugWalletBtn"
 
 interface EnhancedAgentCardProps {
   agent: Agent;
@@ -16,6 +17,8 @@ const EnhancedAgentCard = ({ agent }: EnhancedAgentCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { toast } = useToast();
+
+  const { isFree, created_by } = agent
 
   // const handleShare = async () => {
   //   if (navigator.share) {
@@ -44,8 +47,8 @@ const EnhancedAgentCard = ({ agent }: EnhancedAgentCardProps) => {
 
   return (
     <>
-      <div className="relative group p-1 rounded-lg bg-gradient-to-b from-neon-blue/50 via-neon-purple/50 to-acid-green/50 border-none">
-        <div className="h-full w-full p-6 rounded-md glassmorphic bg-base-black flex flex-col space-y-4 transition-transform duration-300 group-hover:-translate-y-1">
+      <div className="relative group p-1 rounded-lg bg-gradient-to-b from-neon-blue/50 via-neon-purple/50 to-acid-green/50 border-none w-full">
+        <div className="h-full w-full p-6 rounded-md glassmorphic bg-base-black flex flex-col space-y-4 transition-transform duration-300 group-hover:-translate-y-1 w-full">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div>
@@ -72,7 +75,7 @@ const EnhancedAgentCard = ({ agent }: EnhancedAgentCardProps) => {
             <p>{agent.created_by?.toString()}</p>
           </div>
           {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
             <Button
               variant="outline"
               onClick={() => setIsPreviewOpen(true)}
@@ -88,6 +91,16 @@ const EnhancedAgentCard = ({ agent }: EnhancedAgentCardProps) => {
             >
               Start Conversation <ArrowRight className="h-4 w-4" />
             </Button>
+
+            {
+              !isFree && <PayWithPlugWalletBtn 
+                className="w-full" 
+                params={
+                  principal={created_by}
+                  amount={agent.price}
+                }
+              />
+            }
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+
 module {
     public type Agent = {
         id : Text;
@@ -48,5 +49,8 @@ module {
     };
     public type Tool = {
         #function : Function;
+    };
+    public type Tokens = {
+        e8s : Nat64;
     };
 };

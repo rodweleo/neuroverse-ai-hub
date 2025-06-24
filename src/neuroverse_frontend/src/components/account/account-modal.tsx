@@ -38,6 +38,14 @@ export default function AccountModal() {
         return principal.toString().slice(0, 8) + "..." + principal.toString().slice(principal.toString().length - 8, principal.toString().length)
     }
 
+    const handleLogout = async () => {
+        await logout()
+
+        //close the account modal
+        if(isOpen){
+            setOpen(false)
+        }
+    }
     return (
         <Dialog
             open={isOpen}
@@ -71,7 +79,7 @@ export default function AccountModal() {
                         </li>
                     })}
                     <Separator />
-                    <li className="w-full"><Button onClick={logout} className="bg-slate-800 hover:bg-slate-700 text-slate-400 w-full flex items-center justify-start"> <LogOut /> Disconnect</Button></li>
+                    <li className="w-full"><Button onClick={handleLogout} className="bg-slate-800 hover:bg-slate-700 text-slate-400 w-full flex items-center justify-start"> <LogOut /> Disconnect</Button></li>
                 </ul>
             </DialogContent>
         </Dialog>
