@@ -5,12 +5,12 @@ import TokenService from "@/services/TokenService"
 import { useAuth } from "@/contexts/use-auth-client"
 import { toast } from "@/hooks/use-toast"
 import { getAccountIdFromPrincipal } from '@/utils';
-import { Principal } from "@dfinity/principal"; 
+import { Principal } from "@dfinity/principal";
 
 interface PayWithPlugWalletBtnProps {
     className?: string;
     label?: string;
-    options?: {
+    params?: {
         principal?: Principal;
         amount: number
     }
@@ -18,8 +18,8 @@ interface PayWithPlugWalletBtnProps {
 
 export default function PayWithPlugWalletBtn(props: PayWithPlugWalletBtnProps) {
     const { principal: fallbackPrincipal } = useAuth()
-    const { label, className, options } = props
-    const { principal, amount } = options
+    const { label, className, params } = props
+    const { principal, amount } = params
 
     const handleTransfer = async () => {
         if (!window.ic?.plug) {
@@ -31,7 +31,7 @@ export default function PayWithPlugWalletBtn(props: PayWithPlugWalletBtnProps) {
             return;
         }
 
-        if(!principal){
+        if (!principal) {
             return
         }
 

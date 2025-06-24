@@ -93,12 +93,12 @@ const EnhancedAgentCard = ({ agent }: EnhancedAgentCardProps) => {
             </Button>
 
             {
-              !isFree && <PayWithPlugWalletBtn 
-                className="w-full" 
-                params={
-                  principal={created_by}
-                  amount={agent.price}
-                }
+              !isFree && <PayWithPlugWalletBtn
+                className="w-full"
+                params={{
+                  principal: created_by,
+                  amount: Number(agent.price)
+                }}
               />
             }
           </div>
