@@ -2,8 +2,7 @@
   "canisters": {
     "neuroverse_backend": {
       "dependencies": [
-        "llm",
-        "icp_ledger_canister"
+        "llm"
       ],
       "main": "src/neuroverse_backend/main.mo",
       "type": "motoko"
@@ -34,20 +33,11 @@
       "specified_id": "rdmx6-jaaaa-aaaaa-aaadq-cai",
       "remote": {
         "id": {
-          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+          "playground": "rdmx6-jaaaa-aaaaa-aaadq-cai"
         }
       },
       "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
-    },
-    "icp_ledger_canister": {
-      "type": "custom",
-      "candid": "https://raw.githubusercontent.com/dfinity/ic/d87954601e4b22972899e9957e800406a0a6b929/rs/rosetta-api/icp_ledger/ledger.did",
-      "wasm": "https://download.dfinity.systems/ic/d87954601e4b22972899e9957e800406a0a6b929/canisters/ledger-canister.wasm.gz",
-      "remote": {
-        "id": {
-          "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
-        }
-      }
     }
   },
   "defaults": {

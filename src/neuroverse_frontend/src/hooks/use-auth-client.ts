@@ -12,9 +12,7 @@ const development = process.env.DFX_NETWORK !== "ic";
 
 const getIdentityProvider = () => {
     if (typeof window !== "undefined") {
-        return development
-            ? "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:4943"
-            : "https://identity.ic0.app";
+        return "https://identity.ic0.app";
     }
     return undefined;
 };

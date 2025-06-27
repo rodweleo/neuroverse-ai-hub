@@ -23,7 +23,7 @@ actor NeuroVerse {
   private stable var agentStableStore : [Types.AgentEntry] = [];
 
   // Assume you have a map to store conversation history per (user, agent)
-  private var conversationHistory : HashMap.HashMap<(Principal, Text), [Types.Message]> = HashMap.HashMap<(Principal, Text), [Types.Message]>(10, func((a, b), (c, d)) { a == c and b == d }, func((a, b)) { Principal.hash(a) + Text.hash(b) });
+  private var conversationHistory : HashMap.HashMap<(Principal, Text), [Types.Message]> = HashMap.HashMap<(Principal, Text), [Types.Message]>(10, func((a, b), (c, d)) { a == c and b == d }, func((a, b)) { Principal.hash(a) +% Text.hash(b) });
 
   public func prompt(prompt : Text) : async Text {
     await LLM.prompt(#Llama3_1_8B, prompt);
