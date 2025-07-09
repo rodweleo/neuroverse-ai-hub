@@ -4,7 +4,7 @@
       "dependencies": [
         "llm"
       ],
-      "main": "src/neuroverse_backend/main.mo",
+      "main": "src/neuroverse_backend/Main.mo",
       "type": "motoko"
     },
     "neuroverse_frontend": {
@@ -44,6 +44,11 @@
     "build": {
       "args": "",
       "packtool": "mops sources"
+    },
+    "bitcoin": {
+      "enabled": true,
+      "nodes": ["127.0.0.1:18444"],
+      "log_level": "info"
     }
   },
   "output_env_file": ".env",
