@@ -12,6 +12,7 @@ import P2pkh "P2pkh";
 import P2trKeyOnly "P2trKeyOnly";
 import P2tr "P2tr";
 import Helpers "Helpers";
+import ToolRegistry "ToolRegistry";
 
 actor NeuroVerse {
 
@@ -50,9 +51,10 @@ actor NeuroVerse {
 
   private stable var stableAgents : [(Text, Types.Agent)] = [];
   private stable var agentStableStore : [Types.AgentEntry] = [];
+  private stable var toolsStable : [(Text, ToolRegistry.Tool)] = [];
 
-  // Assume you have a map to store conversation history per (user, agent)
   private var conversationHistory : HashMap.HashMap<(Principal, Text), [Types.Message]> = HashMap.HashMap<(Principal, Text), [Types.Message]>(10, func((a, b), (c, d)) { a == c and b == d }, func((a, b)) { Principal.hash(a) +% Text.hash(b) });
+  let tools = HashMap.HashMap<Text, ToolRegistry.Tool>(32, Text.equal, Text.hash);
 
   public func prompt(prompt : Text) : async Text {
     await LLM.prompt(#Llama3_1_8B, prompt);
@@ -359,6 +361,18 @@ actor NeuroVerse {
     Array.flatten([DERIVATION_PATH, [Blob.toArray(suffix)]]);
   };
 
+  /**TOOL REGISTRY**/
+  public func registerTool(tool : ToolRegistry.Tool) : async () {
+    tools.put(tool.id, tool);
+  };
+
+  public func getTools() : async [ToolRegistry.Tool] {
+    Iter.toArray<ToolRegistry.Tool>(tools.vals());
+  };
+
+  public func getToolById(id : Text) : async ?ToolRegistry.Tool {
+    tools.get(id);
+  };
   /**PERSISTING STORAGE**/
 
   system func preupgrade() {
@@ -369,6 +383,9 @@ actor NeuroVerse {
       let agentList = Iter.toArray(agentMap.entries());
       agentStableStore := Array.append(agentStableStore, [{ user = user; agents = agentList }]);
     };
+
+    /**TOOL DATA PERSISTENCE**/
+    toolsStable := Iter.toArray(tools.entries());
   };
 
   system func postupgrade() {
@@ -389,6 +406,12 @@ actor NeuroVerse {
       userAgents.put(entry.user, agentMap);
     };
     agents := HashMap.fromIter<Text, Types.Agent>(stableAgents.vals(), 10, Text.equal, Text.hash);
+
+    /**TOOL DATA PERSISTENCE**/
+    for ((id, tool) in toolsStable.vals()) {
+      tools.put(id, tool);
+    };
+    toolsStable := [];
   }
 
 };
