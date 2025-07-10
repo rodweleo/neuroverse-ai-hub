@@ -1,4 +1,5 @@
 import LLM "mo:llm";
+import IC "ic:aaaaa-aa";
 import HashMap "mo:base/HashMap";
 import Types "Types";
 import Principal "mo:base/Principal";
@@ -6,6 +7,8 @@ import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
+import Buffer "mo:base/Buffer";
+import Error "mo:base/Error";
 import BitcoinAPI "BitcoinAPI";
 import Utils "Utils";
 import P2pkh "P2pkh";
@@ -54,7 +57,7 @@ actor NeuroVerse {
   private stable var toolsStable : [(Text, ToolRegistry.Tool)] = [];
 
   private var conversationHistory : HashMap.HashMap<(Principal, Text), [Types.Message]> = HashMap.HashMap<(Principal, Text), [Types.Message]>(10, func((a, b), (c, d)) { a == c and b == d }, func((a, b)) { Principal.hash(a) +% Text.hash(b) });
-  let tools = HashMap.HashMap<Text, ToolRegistry.Tool>(32, Text.equal, Text.hash);
+  private var tools = HashMap.HashMap<Text, ToolRegistry.Tool>(32, Text.equal, Text.hash);
 
   public func prompt(prompt : Text) : async Text {
     await LLM.prompt(#Llama3_1_8B, prompt);
@@ -137,7 +140,7 @@ actor NeuroVerse {
     };
   };
 
-  public func createAgent(agentId : Text, name : Text, category : Text, description : Text, system_prompt : Text, isFree : Bool, price : Nat, vendor : Principal) : async () {
+  public func createAgent(agentId : Text, name : Text, category : Text, description : Text, system_prompt : Text, isFree : Bool, price : Nat, vendor : Principal, has_tools : Bool, tools : [Text]) : async () {
 
     let agent : Types.Agent = {
       id = agentId;
@@ -145,6 +148,8 @@ actor NeuroVerse {
       category = category;
       description = description;
       system_prompt = system_prompt;
+      has_tools = has_tools;
+      tools = tools;
       isFree = isFree;
       price = price;
       created_by = vendor;
@@ -171,6 +176,47 @@ actor NeuroVerse {
       };
     };
     result;
+  };
+
+  public shared func getAgentById(agentId : Text) : async ?Types.FullAgent {
+    let agentOpt = agents.get(agentId);
+    switch (agentOpt) {
+      case null { null };
+      case (?agent) {
+        // let fullTools = Array.map<Text, ToolRegistry.Tool>(
+        //   agent.tools,
+        //   func(toolId) {
+        //     switch (tools.get(toolId)) {
+        //       case null { null };
+        //       case (?tool) { tool };
+        //     };
+        //   },
+        // );
+        let toolBuffer = Buffer.Buffer<ToolRegistry.Tool>(agent.tools.size());
+
+        for (toolId in agent.tools.vals()) {
+          switch (tools.get(toolId)) {
+            case (?tool) { toolBuffer.add(tool) };
+            case null { /* skip missing tool */ };
+          };
+        };
+
+        let fullTools = Buffer.toArray(toolBuffer);
+        return ?{
+          id = agent.id;
+          name = agent.name;
+          category = agent.category;
+          description = agent.description;
+          system_prompt = agent.system_prompt;
+          has_tools = agent.has_tools;
+          isFree = agent.isFree;
+          price = agent.price;
+          created_by = agent.created_by;
+          tools = fullTools;
+        };
+
+      };
+    };
   };
 
   public func getAgentsForUser(user : Principal) : async [Types.Agent] {
@@ -295,6 +341,24 @@ actor NeuroVerse {
   };
 
   /** IMPLEMENTATION OF BITCOIN **/
+  public shared (msg) func getUserBtcAddress() : async {
+    #Ok : { public_key : Blob };
+    #Err : Text;
+  } {
+    let caller = Principal.toBlob(msg.caller);
+
+    try {
+      let { public_key } = await IC.ecdsa_public_key({
+        canister_id = null;
+        derivation_path = [caller];
+        key_id = { curve = #secp256k1; name = "test_key_1" };
+      });
+      #Ok({ public_key });
+    } catch (err) {
+      #Err(Error.message(err));
+    };
+  };
+
   /// Returns the balance of the given Bitcoin address.
   public func get_balance(address : Types.BitcoinAddress) : async Types.Satoshi {
     await BitcoinAPI.get_balance(NETWORK, address);
