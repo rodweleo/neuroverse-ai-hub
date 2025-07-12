@@ -1,0 +1,62 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
+
+type ToolCardEditorChoiceProps = {
+  tool: any;
+  onSelectTool: (tool: any) => void;
+};
+const ToolCardEditorChoice = ({
+  tool,
+  onSelectTool,
+}: ToolCardEditorChoiceProps) => {
+  const handleSelectTool = (tool: any) => {
+    onSelectTool(tool);
+  };
+  return (
+    <Card
+      key={tool.id}
+      className="group hover:shadow-lg transition-all duration-300 border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50"
+    >
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="text-3xl">{tool.icon}</div>
+            <div>
+              <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
+                {tool.name}
+              </CardTitle>
+              <p className="text-sm text-gray-500">by {tool.creator}</p>
+            </div>
+          </div>
+          <Badge className="bg-yellow-500 text-white">Featured</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <CardDescription className="mb-4 line-clamp-2">
+          {tool.description}
+        </CardDescription>
+
+        <div className="flex items-center justify-between">
+          <Button
+            size="sm"
+            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+            onClick={handleSelectTool}
+          >
+            Integrate
+          </Button>
+        </div>
+      </CardContent>
+      <CardFooter></CardFooter>
+    </Card>
+  );
+};
+
+export default ToolCardEditorChoice;
