@@ -9,20 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
-interface Tool {
-  id: string;
-  name: string;
-  description: string;
-  creator: string;
-  category: string;
-  type: "free" | "premium" | "token-gated";
-  price: number;
-  currency: string | null;
-  icon: string;
-  tags: string[];
-  openSource: boolean;
-}
+import { Tool } from "@/utils/types";
 
 interface ToolCardProps {
   tool: Tool;

@@ -8,16 +8,17 @@ import {
   CardDescription,
   CardFooter,
 } from "@/components/ui/card";
+import { Tool } from "@/utils/types";
 
 type ToolCardEditorChoiceProps = {
-  tool: any;
-  onSelectTool: (tool: any) => void;
+  tool: Tool;
+  onSelectTool: (tool: Tool) => void;
 };
 const ToolCardEditorChoice = ({
   tool,
   onSelectTool,
 }: ToolCardEditorChoiceProps) => {
-  const handleSelectTool = (tool: any) => {
+  const handleSelectTool = (tool: Tool) => {
     onSelectTool(tool);
   };
   return (
@@ -30,7 +31,7 @@ const ToolCardEditorChoice = ({
           <div className="flex items-center gap-3">
             <div className="text-3xl">{tool.icon}</div>
             <div>
-              <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
+              <CardTitle className="text-lg transition-colors">
                 {tool.name}
               </CardTitle>
               <p className="text-sm text-gray-500">by {tool.creator}</p>
@@ -43,18 +44,18 @@ const ToolCardEditorChoice = ({
         <CardDescription className="mb-4 line-clamp-2">
           {tool.description}
         </CardDescription>
-
-        <div className="flex items-center justify-between">
+      </CardContent>
+      <CardFooter className="w-full">
+        <div className="w-full flex items-center justify-between">
           <Button
             size="sm"
             className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
-            onClick={handleSelectTool}
+            onClick={() => handleSelectTool(tool)}
           >
             Integrate
           </Button>
         </div>
-      </CardContent>
-      <CardFooter></CardFooter>
+      </CardFooter>
     </Card>
   );
 };

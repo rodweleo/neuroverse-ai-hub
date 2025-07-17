@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,12 @@ const formSchema = z.object({
   description: z.string().min(2, {
     message: "Tool description must be at least 2 characters.",
   }),
+  price: z.string().min(2, {
+    message: "Tool description must be at least 2 characters.",
+  }),
+  currency: z.string().min(2, {
+    message: "Tool description must be at least 2 characters.",
+  }),
 });
 
 const ToolSubmissionForm = () => {
@@ -37,6 +44,8 @@ const ToolSubmissionForm = () => {
     defaultValues: {
       name: "",
       description: "",
+      price: "0.00",
+      currency: "ICP",
     },
   });
 
@@ -51,7 +60,7 @@ const ToolSubmissionForm = () => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
-          name="username"
+          name="name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Tool Name *</FormLabel>
@@ -67,12 +76,12 @@ const ToolSubmissionForm = () => {
         />
         <FormField
           control={form.control}
-          name="username"
+          name="description"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Description *</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Textarea placeholder="shadcn" {...field} />
               </FormControl>
               <FormDescription>
                 This is your tool's description, what it does and the expected
@@ -85,7 +94,7 @@ const ToolSubmissionForm = () => {
         <div className="flex items-center gap-2 w-full">
           <FormField
             control={form.control}
-            name="username"
+            name="price"
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Price *</FormLabel>
@@ -101,7 +110,7 @@ const ToolSubmissionForm = () => {
           />
           <FormField
             control={form.control}
-            name="username"
+            name="currency"
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Currency *</FormLabel>
@@ -134,8 +143,7 @@ const ToolSubmissionForm = () => {
                   </Select>
                 </FormControl>
                 <FormDescription>
-                  This is the currency to be utilized when paying for the
-                  integration of the tool to AI Agents.
+                  This is the currency used to balance the price for the tool.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

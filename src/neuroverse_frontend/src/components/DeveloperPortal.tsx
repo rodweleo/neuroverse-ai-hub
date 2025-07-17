@@ -177,7 +177,7 @@ export const DeveloperPortal: React.FC<DeveloperPortalProps> = ({
                   </CardHeader>
                   <CardContent>
                     <ToolSubmissionForm />
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-6 hidden">
                       <div>
                         <Label htmlFor="name">Tool Name *</Label>
                         <Input

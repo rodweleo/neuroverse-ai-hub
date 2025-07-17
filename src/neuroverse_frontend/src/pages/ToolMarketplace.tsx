@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import ToolCard from "@/components/tools/ToolCard";
 import ToolCardEditorChoice from "@/components/tools/ToolCardEditorChoice";
 import { DeveloperPortal } from "@/components/DeveloperPortal";
+import { Tool } from "@/utils/types";
 
 const ToolMarketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,7 +34,7 @@ const ToolMarketplace = () => {
     { id: "communication", name: "Communication", icon: Zap },
   ];
 
-  const featuredTools = [
+  const featuredTools: Tool[] = [
     {
       id: "weather-api",
       name: "Weather Oracle",
@@ -44,14 +45,7 @@ const ToolMarketplace = () => {
       type: "premium",
       price: 0.5,
       currency: "ckBTC",
-      rating: 4.8,
-      users: 1245,
-      verified: true,
-      cycleCost: "2.1B",
-      version: "2.1.0",
       icon: "🌦️",
-      tags: ["weather", "location", "real-time"],
-      openSource: false,
     },
     {
       id: "pdf-reader",
@@ -63,14 +57,7 @@ const ToolMarketplace = () => {
       type: "free",
       price: 0,
       currency: null,
-      rating: 4.6,
-      users: 2891,
-      verified: true,
-      cycleCost: "1.5B",
-      version: "1.8.2",
       icon: "📄",
-      tags: ["pdf", "ocr", "document"],
-      openSource: true,
     },
     {
       id: "web-scraper",
@@ -82,14 +69,7 @@ const ToolMarketplace = () => {
       type: "premium",
       price: 1.2,
       currency: "ckBTC",
-      rating: 4.9,
-      users: 856,
-      verified: true,
-      cycleCost: "3.8B",
-      version: "3.0.1",
       icon: "🕷️",
-      tags: ["scraping", "web", "data"],
-      openSource: false,
     },
     {
       id: "crypto-oracle",
@@ -101,32 +81,18 @@ const ToolMarketplace = () => {
       type: "token-gated",
       price: 2.0,
       currency: "ckBTC",
-      rating: 4.7,
-      users: 634,
-      verified: true,
-      cycleCost: "4.2B",
-      version: "1.5.0",
       icon: "₿",
-      tags: ["crypto", "defi", "blockchain"],
-      openSource: false,
     },
     {
       id: "translator",
       name: "Universal Translator",
       description: "Support for 100+ languages with context-aware translations",
       creator: "0xLinguist",
-      category: "utility",
+      category: "communication",
       type: "free",
       price: 0,
       currency: null,
-      rating: 4.5,
-      users: 3421,
-      verified: true,
-      cycleCost: "0.8B",
-      version: "2.3.1",
       icon: "🌐",
-      tags: ["translation", "language", "i18n"],
-      openSource: true,
     },
     {
       id: "zapier-bridge",
@@ -138,24 +104,14 @@ const ToolMarketplace = () => {
       type: "premium",
       price: 0.8,
       currency: "ckBTC",
-      rating: 4.4,
-      users: 1789,
-      verified: true,
-      cycleCost: "2.5B",
-      version: "1.9.0",
       icon: "⚡",
-      tags: ["automation", "webhooks", "integration"],
-      openSource: false,
     },
   ];
 
   const filteredTools = featuredTools.filter((tool) => {
     const matchesSearch =
       tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tool.tags.some((tag) =>
-        tag.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      tool.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
       selectedCategory === "all" || tool.category === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -295,7 +251,10 @@ const ToolMarketplace = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredTools.slice(0, 3).map((tool) => (
-                <ToolCardEditorChoice tool={tool} onSelect={setSelectedTool} />
+                <ToolCardEditorChoice
+                  tool={tool}
+                  onSelectTool={setSelectedTool}
+                />
               ))}
             </div>
           </div>
