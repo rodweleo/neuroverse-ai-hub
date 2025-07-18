@@ -19,13 +19,16 @@ import ToolCard from "@/components/tools/ToolCard";
 import ToolCardEditorChoice from "@/components/tools/ToolCardEditorChoice";
 import { DeveloperPortal } from "@/components/DeveloperPortal";
 import { Tool } from "@/utils/types";
+import { useAllTools } from "@/hooks/use-all-tools";
 
 const ToolMarketplace = () => {
+  const { data, isFetching } = useAllTools();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedTool, setSelectedTool] = useState(null);
   const [showDeveloperPortal, setShowDeveloperPortal] = useState(false);
 
+  console.log(data);
   const categories = [
     { id: "all", name: "All Tools", icon: Globe },
     { id: "api", name: "APIs", icon: Cloud },
@@ -34,102 +37,23 @@ const ToolMarketplace = () => {
     { id: "communication", name: "Communication", icon: Zap },
   ];
 
-  const featuredTools: Tool[] = [
-    {
-      id: "weather-api",
-      name: "Weather Oracle",
-      description:
-        "Real-time weather data from OpenWeather API with location detection",
-      creator: "0xWeatherDev",
-      category: "api",
-      type: "premium",
-      price: 0.5,
-      currency: "ckBTC",
-      icon: "🌦️",
-    },
-    {
-      id: "pdf-reader",
-      name: "PDF Intelligence",
-      description:
-        "Extract and analyze content from PDF documents with OCR capabilities",
-      creator: "0xDocProcessor",
-      category: "data",
-      type: "free",
-      price: 0,
-      currency: null,
-      icon: "📄",
-    },
-    {
-      id: "web-scraper",
-      name: "Web Data Harvester",
-      description:
-        "Intelligent web scraping with anti-bot detection and rate limiting",
-      creator: "0xScrapeMaster",
-      category: "api",
-      type: "premium",
-      price: 1.2,
-      currency: "ckBTC",
-      icon: "🕷️",
-    },
-    {
-      id: "crypto-oracle",
-      name: "Blockchain Analyzer",
-      description:
-        "Real-time crypto prices, wallet analysis, and DeFi protocol data",
-      creator: "0xCryptoOracle",
-      category: "api",
-      type: "token-gated",
-      price: 2.0,
-      currency: "ckBTC",
-      icon: "₿",
-    },
-    {
-      id: "translator",
-      name: "Universal Translator",
-      description: "Support for 100+ languages with context-aware translations",
-      creator: "0xLinguist",
-      category: "communication",
-      type: "free",
-      price: 0,
-      currency: null,
-      icon: "🌐",
-    },
-    {
-      id: "zapier-bridge",
-      name: "Zapier Connect",
-      description:
-        "Integrate with 5000+ apps through Zapier webhooks and automation",
-      creator: "0xAutomation",
-      category: "communication",
-      type: "premium",
-      price: 0.8,
-      currency: "ckBTC",
-      icon: "⚡",
-    },
-  ];
-
-  const filteredTools = featuredTools.filter((tool) => {
-    const matchesSearch =
-      tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tool.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "all" || tool.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  const stats = {
-    totalTools: 247,
-    activeDevelopers: 89,
-    totalIntegrations: 12456,
-    avgRating: 4.6,
-  };
+  const filteredTools = data
+    ? data.filter((tool) => {
+        const matchesSearch =
+          tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          tool.description.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory =
+          selectedCategory === "all" || tool.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+      })
+    : [];
 
   return (
     <main className="container py-8 space-y-4">
       <header className="space-y-4 flex items-end justify-between h-60 bg-gradient-to-r from-neon-blue/30 to-neon-purple/30 p-6 rounded-lg shadow-lg">
         <div className="space-y-2 w-full max-w-2xl">
           <h1 className="text-6xl font-orbitron font-bold holographic-text py-2">
-            Tools App Store
+            Tool Store
           </h1>
           <p className="text-md text-muted-foreground">
             Discover, integrate, and monetize AI tools that supercharge your
@@ -240,23 +164,6 @@ const ToolMarketplace = () => {
                 )}
               </TabsContent>
             </Tabs>
-          </div>
-
-          {/* Featured Section */}
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Editor's Choice</h2>
-              <Button variant="outline">View All Featured</Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredTools.slice(0, 3).map((tool) => (
-                <ToolCardEditorChoice
-                  tool={tool}
-                  onSelectTool={setSelectedTool}
-                />
-              ))}
-            </div>
           </div>
         </div>
         {/* Tool Integration Modal

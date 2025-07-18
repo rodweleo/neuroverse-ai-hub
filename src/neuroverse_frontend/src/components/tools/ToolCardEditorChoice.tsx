@@ -26,12 +26,12 @@ const ToolCardEditorChoice = ({
       key={tool.id}
       className="group hover:shadow-lg transition-all duration-300 border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-orange-50"
     >
-      <CardHeader className="pb-3">
+      <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="text-3xl">{tool.icon}</div>
             <div>
-              <CardTitle className="text-lg transition-colors">
+              <CardTitle className="text-lg text-gray-800">
                 {tool.name}
               </CardTitle>
               <p className="text-sm text-gray-500">by {tool.creator}</p>
@@ -41,12 +41,12 @@ const ToolCardEditorChoice = ({
         </div>
       </CardHeader>
       <CardContent>
-        <CardDescription className="mb-4 line-clamp-2">
+        <CardDescription className="line-clamp-2 text-gray-600">
           {tool.description}
         </CardDescription>
       </CardContent>
       <CardFooter className="w-full">
-        <div className="w-full flex items-center justify-between">
+        <div className="w-full flex items-center justify-end">
           <Button
             size="sm"
             className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"

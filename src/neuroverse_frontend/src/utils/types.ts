@@ -8,4 +8,5 @@ export type Tool = {
   price: number;
   currency: string | null;
   icon: string;
+  function_name?: string;
 };

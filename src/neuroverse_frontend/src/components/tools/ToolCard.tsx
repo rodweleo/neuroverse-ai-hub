@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tool } from "@/utils/types";
+import { Separator } from "../ui/separator";
 
 interface ToolCardProps {
   tool: Tool;
@@ -63,16 +64,19 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect }) => {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <CardDescription className="line-clamp-2 text-sm">
-          {tool.description}
+        <CardDescription className="text-sm space-y-2">
+          <p>{tool.description}</p>
+          <div className="flex items-center gap-2">
+            <h2 className="text-primary">Function Name: </h2>
+            <p className="font-bold">{tool.function_name}</p>
+          </div>
         </CardDescription>
-
+        <Separator />
         {/* Price and Action */}
-        <div className="flex items-center justify-between pt-2 border-t">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {tool.type !== "free" ? (
-              <div className="flex items-center gap-1 text-lg font-semibold text-blue-600">
-                <DollarSign className="h-4 w-4" />
+              <div className="flex items-center gap-1 text-lg font-semibold">
                 {tool.price} {tool.currency}
               </div>
             ) : (
