@@ -19,7 +19,7 @@ const navLinks = [
 
 const Header = () => {
   return (
-    <header className="sticky top-0 z-50 w-full glassmorphic">
+    <header className="sticky top-0 z-50 w-full bg-black/50 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <img
