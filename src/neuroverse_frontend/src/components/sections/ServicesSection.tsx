@@ -18,7 +18,7 @@ const ServicesSection = () => {
       description:
         "Deploy sophisticated AI agents with custom personalities and specialized knowledge domains.",
       cta: {
-        href: "/agents-marketplace",
+        href: "/agent-marketplace",
         label: "Explore AI agents",
       },
     },

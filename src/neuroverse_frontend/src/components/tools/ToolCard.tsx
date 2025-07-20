@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tool } from "@/utils/types";
 import { Separator } from "../ui/separator";
+import { Tool } from "../../../../declarations/neuroverse_backend/neuroverse_backend.did";
 
 interface ToolCardProps {
   tool: Tool;
@@ -49,7 +49,7 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect }) => {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-3">
-            <div className="text-2xl">{tool.icon}</div>
+            {/* <div className="text-2xl">{tool.icon}</div> */}
             <div>
               <CardTitle className="text-lg group-hover:text-blue-600 transition-colors line-clamp-1">
                 {tool.name}
@@ -59,7 +59,10 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect }) => {
         </div>
 
         <div className="text-xs text-gray-500 mb-2">
-          by <span className="font-mono text-blue-600">{tool.creator}</span>
+          by{" "}
+          <span className="font-mono text-blue-600">
+            {tool.creator.toString()}
+          </span>
         </div>
       </CardHeader>
 
@@ -75,9 +78,10 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect }) => {
         {/* Price and Action */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {tool.type !== "free" ? (
+            {tool.tool_type !== "free" ? (
               <div className="flex items-center gap-1 text-lg font-semibold">
-                {tool.price} {tool.currency}
+                {Number(tool.price).toPrecision(Number(tool.decimals))}{" "}
+                {tool.currency}
               </div>
             ) : (
               <div className="text-lg font-semibold text-green-600">FREE</div>
@@ -89,7 +93,7 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, onSelect }) => {
             onClick={() => onSelect(tool)}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
-            {tool.type === "free" ? "Add Tool" : "Purchase"}
+            {tool.tool_type === "free" ? "Add Tool" : "Purchase"}
           </Button>
         </div>
       </CardContent>

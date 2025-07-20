@@ -12,6 +12,7 @@ module ToolRegistry {
         price : Nat;
         decimals : Nat;
         currency : Text;
+        tool_type : Text;
     };
 
 };

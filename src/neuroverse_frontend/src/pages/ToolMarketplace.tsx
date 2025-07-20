@@ -16,9 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import ToolCard from "@/components/tools/ToolCard";
-import ToolCardEditorChoice from "@/components/tools/ToolCardEditorChoice";
+
 import { DeveloperPortal } from "@/components/DeveloperPortal";
-import { Tool } from "@/utils/types";
 import { useAllTools } from "@/hooks/use-all-tools";
 
 const ToolMarketplace = () => {
@@ -28,7 +27,6 @@ const ToolMarketplace = () => {
   const [selectedTool, setSelectedTool] = useState(null);
   const [showDeveloperPortal, setShowDeveloperPortal] = useState(false);
 
-  console.log(data);
   const categories = [
     { id: "all", name: "All Tools", icon: Globe },
     { id: "api", name: "APIs", icon: Cloud },
