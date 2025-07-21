@@ -4,13 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Card,
   CardContent,
   CardDescription,
@@ -18,20 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Rocket,
-  Brain,
-  Stethoscope,
-  GraduationCap,
-  Bot,
-  Palette,
-  Code,
-  Heart,
-  Settings,
-  FileText,
-  Puzzle,
-  ALargeSmall,
-} from "lucide-react";
+import { Rocket, Settings, FileText, Puzzle, ALargeSmall } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import KnowledgeBaseManager, { KnowledgeConfig } from "./KnowledgeBaseManager";
 import { KnowledgeDocument } from "./DocumentUpload";
@@ -40,6 +20,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/use-auth-client";
 import AuthBtn from "@/components/auth/auth-btn";
+import { useAllTools } from "@/hooks/use-all-tools";
+import { Link } from "react-router-dom";
 
 interface AgentFormData {
   name: string;
@@ -60,6 +42,8 @@ interface AgentFormData {
 const AgentCreationForm = () => {
   const { principal, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { data: availableTools } = useAllTools();
+
   const [formData, setFormData] = useState<AgentFormData>({
     name: "",
     description: "",
@@ -83,26 +67,6 @@ const AgentCreationForm = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [toolSearchQuery, setToolSearchQuery] = useState("");
-
-  const iconOptions = [
-    { value: "Bot", label: "Bot", icon: Bot },
-    { value: "Brain", label: "Brain", icon: Brain },
-    { value: "Stethoscope", label: "Medical", icon: Stethoscope },
-    { value: "GraduationCap", label: "Education", icon: GraduationCap },
-    { value: "Palette", label: "Creative", icon: Palette },
-    { value: "Code", label: "Technical", icon: Code },
-    { value: "Heart", label: "Support", icon: Heart },
-  ];
-
-  const colorOptions = [
-    { value: "text-neon-blue", label: "Neon Blue", preview: "bg-neon-blue" },
-    {
-      value: "text-neon-purple",
-      label: "Neon Purple",
-      preview: "bg-neon-purple",
-    },
-    { value: "text-acid-green", label: "Acid Green", preview: "bg-acid-green" },
-  ];
 
   const roleTemplates = [
     {
@@ -187,7 +151,9 @@ const AgentCreationForm = () => {
         formData.systemPrompt,
         formData.isFree,
         BigInt(formData.price),
-        principal
+        principal,
+        formData.tools.length > 0,
+        formData.tools
       );
 
       toast({
@@ -228,29 +194,19 @@ const AgentCreationForm = () => {
         overlap: 200,
       },
       isFree: true,
+      tools: [],
     });
   };
+
+  const filteredTools = availableTools
+    ? availableTools.filter((tool) => {
+        return (tool.name + " " + tool.description).includes(toolSearchQuery);
+      })
+    : [];
 
   const handleSearchTool = (e) => {
     setToolSearchQuery(e.target.value);
   };
-
-  const tools = [
-    {
-      id: 1,
-      name: "Test name",
-      description: "Test Description",
-      tool_type: "FREE",
-      function_name: "test_name",
-    },
-    {
-      id: 2,
-      name: "Test name",
-      description: "Test Description",
-      tool_type: "FREE",
-      function_name: "test_name",
-    },
-  ];
 
   return (
     <div className="space-y-8 ">
@@ -267,7 +223,7 @@ const AgentCreationForm = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 glassmorphic">
+              <TabsList className="grid w-full grid-cols-3 glassmorphic">
                 <TabsTrigger value="basic" className="flex items-center gap-2">
                   <Settings className="h-4 w-4" />
                   Basic Settings
@@ -278,13 +234,6 @@ const AgentCreationForm = () => {
                 >
                   <FileText className="h-4 w-4" />
                   Knowledge Base
-                </TabsTrigger>
-                <TabsTrigger
-                  value="advanced"
-                  className="flex items-center gap-2"
-                >
-                  <Brain className="h-4 w-4" />
-                  Advanced
                 </TabsTrigger>
                 <TabsTrigger value="tools" className="flex items-center gap-2">
                   <Puzzle className="h-4 w-4" />
@@ -400,6 +349,26 @@ const AgentCreationForm = () => {
                     </p>
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pricing" className="text-lg font-bold">
+                    Price (ICP)
+                  </Label>
+                  <Input
+                    id="pricing"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        price: parseFloat(e.target.value) || 0,
+                      }))
+                    }
+                    className="bg-black/20 focus:ring-neon-blue"
+                  />
+                </div>
               </TabsContent>
 
               <TabsContent value="knowledge" className="mt-6">
@@ -421,100 +390,6 @@ const AgentCreationForm = () => {
                 />
               </TabsContent>
 
-              <TabsContent value="advanced" className="space-y-6 mt-6">
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-lg font-bold">Icon</Label>
-                    <Select
-                      value={formData.icon}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({ ...prev, icon: value }))
-                      }
-                    >
-                      <SelectTrigger className="bg-black/20">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {iconOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            <div className="flex items-center gap-2">
-                              <option.icon className="h-4 w-4" />
-                              {option.label}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-lg font-bold">Theme Color</Label>
-                    <Select
-                      value={formData.color}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({ ...prev, color: value }))
-                      }
-                    >
-                      <SelectTrigger className="bg-black/20">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {colorOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            <div className="flex items-center gap-2">
-                              <div
-                                className={`w-3 h-3 rounded-full ${option.preview}`}
-                              />
-                              {option.label}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="temperature" className="text-lg font-bold">
-                      Creativity (0-1)
-                    </Label>
-                    <Input
-                      id="temperature"
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="1"
-                      value={formData.temperature}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          temperature: parseFloat(e.target.value) || 0.7,
-                        }))
-                      }
-                      className="bg-black/20 focus:ring-neon-blue"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="pricing" className="text-lg font-bold">
-                      Price (ICP)
-                    </Label>
-                    <Input
-                      id="pricing"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          price: parseFloat(e.target.value) || 0,
-                        }))
-                      }
-                      className="bg-black/20 focus:ring-neon-blue"
-                    />
-                  </div>
-                </div>
-              </TabsContent>
               <TabsContent value="tools" className="space-y-6 mt-6">
                 <div>
                   <h1 className="font-bold text-2xl">
@@ -531,9 +406,12 @@ const AgentCreationForm = () => {
                     onChange={(e) => handleSearchTool(e)}
                   />
                   <ul className="space-y-4">
-                    {tools.map((tool, idx: number) => (
-                      <li key={`tool-${idx}`}>
-                        <div key={tool.id} className="flex gap-4">
+                    {filteredTools.map((tool, idx: number) => (
+                      <li
+                        key={`tool-${idx}`}
+                        className="bg-gray-900 p-4 rounded-md w-full max-w-sm"
+                      >
+                        <div key={tool.id} className="flex items-center gap-4">
                           <Checkbox
                             checked={formData.tools.includes(
                               tool.id.toString()
@@ -554,8 +432,8 @@ const AgentCreationForm = () => {
                               }
                             }}
                           />
-                          <div className="-mt-2 flex flex-col">
-                            <div className="flex items-center gap-4">
+                          <div className="-mt-2 flex flex-col w-full">
+                            <div className="flex items-center gap-4 justify-between w-full">
                               <Label
                                 htmlFor="toggle"
                                 className="font-bold text-lg"
@@ -576,8 +454,10 @@ const AgentCreationForm = () => {
                   </ul>
                 </div>
                 <div className="flex items-center justify-end gap-4 *:bg-slate-200">
-                  <Button>Create Custom Tool</Button>
-                  <Button>Browse Marketplace</Button>
+                  {/* <Button>Create Custom Tool</Button> */}
+                  <Link to="/tools-marketplace">
+                    <Button>Browse Marketplace</Button>
+                  </Link>
                 </div>
               </TabsContent>
             </Tabs>
