@@ -9,6 +9,8 @@ import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
 import Error "mo:base/Error";
+import Time "mo:base/Time";
+import Int "mo:base/Int";
 import BitcoinAPI "BitcoinAPI";
 import Utils "Utils";
 import P2pkh "P2pkh";
@@ -183,21 +185,13 @@ actor NeuroVerse {
     switch (agentOpt) {
       case null { null };
       case (?agent) {
-        // let fullTools = Array.map<Text, ToolRegistry.Tool>(
-        //   agent.tools,
-        //   func(toolId) {
-        //     switch (tools.get(toolId)) {
-        //       case null { null };
-        //       case (?tool) { tool };
-        //     };
-        //   },
-        // );
+
         let toolBuffer = Buffer.Buffer<ToolRegistry.Tool>(agent.tools.size());
 
         for (toolId in agent.tools.vals()) {
           switch (tools.get(toolId)) {
             case (?tool) { toolBuffer.add(tool) };
-            case null { /* skip missing tool */ };
+            case null {};
           };
         };
 
@@ -246,91 +240,148 @@ actor NeuroVerse {
     conversationHistory.put((user, agentId), Array.append<Types.Message>(history, [message]));
   };
 
-  // public shared func chatWithAgent(agentId : Text, prompt : Text) : async Text {
-  //   let caller = Principal.fromActor(NeuroVerse);
+  public shared func chatWithAgent(agentId : Text, prompt : Text) : async Text {
+    let caller = Principal.fromActor(NeuroVerse);
 
-  //   // Check if the agent exists in the global agents map
-  //   switch (agents.get(agentId)) {
-  //     case (?agent) {
-  //       let timestamp = Time.now();
+    // Check if the agent exists in the global agents map
+    switch (agents.get(agentId)) {
+      case (?agent) {
+        let timestamp = Time.now();
 
-  //       // Retrieve conversation history for (caller, agentId)
-  //       let history = getHistory(caller, agentId);
+        // Retrieve conversation history for (caller, agentId)
+        let history = getHistory(caller, agentId);
 
-  //       // Create the new user message
-  //       let userMessage : Types.Message = {
-  //         role = #user;
-  //         content = prompt;
-  //         timestamp = timestamp;
-  //       };
+        // Create the new user message
+        let userMessage : Types.Message = {
+          role = #user;
+          content = prompt;
+          timestamp = timestamp;
+        };
 
-  //       // If history is empty, start with the system prompt
-  //       let fullHistory = if (history.size() == 0) {
-  //         Array.append(
-  //           [{
-  //             role = #system_;
-  //             content = agent.system_prompt;
-  //             timestamp = timestamp;
-  //           }],
-  //           [userMessage],
-  //         );
-  //       } else {
-  //         Array.append(history, [userMessage]);
-  //       };
+        // If history is empty, start with the system prompt
+        let fullHistory = if (history.size() == 0) {
+          Array.append(
+            [{
+              role = #system_;
+              content = agent.system_prompt;
+              timestamp = timestamp;
+            }],
+            [userMessage],
+          );
+        } else {
+          Array.append(history, [userMessage]);
+        };
 
-  //       // Convert the array of Message objects to a string
-  //       let historyAsText = Text.join(
-  //         "\n", // separator between messages
-  //         Array.map<Types.Message, Text>(
-  //           fullHistory,
-  //           func(msg : Types.Message) : Text {
-  //             // Convert each Message object to a string representation
-  //             let roleText = switch (msg.role) {
-  //               case (#system_) "System";
-  //               case (#user) "User";
-  //               case (#assistant) "Assistant";
-  //             };
+        // Convert the array of Message objects to a string
+        let historyAsText = Text.join(
+          "\n", // separator between messages
+          Array.map<Types.Message, Text>(
+            fullHistory,
+            func(msg : Types.Message) : Text {
+              // Convert each Message object to a string representation
+              let roleText = switch (msg.role) {
+                case (#system_) "System";
+                case (#user) "User";
+                case (#assistant) "Assistant";
+              };
 
-  //             // Combine the fields into a single string for each message
-  //             roleText # ": " # msg.content # " (at " # Int.toText(msg.timestamp) # ")";
-  //           },
-  //         ).vals(),
-  //       );
+              // Combine the fields into a single string for each message
+              roleText # ": " # msg.content # " (at " # Int.toText(msg.timestamp) # ")";
+            },
+          ).vals(),
+        );
 
-  //       // Now you can concatenate with other text if needed
-  //       let finalPrompt = "Conversation history:\n" # historyAsText # "User prompt:" # prompt;
+        // Now you can concatenate with other text if needed
+        let finalPrompt = "Conversation history:\n" # historyAsText # "User prompt:" # prompt;
 
-  //       // Call the LLM with the full context
-  //       let response = await LLM.chat(
-  //         #Llama3_1_8B,
-  //         [
-  //           {
-  //             role = #system_;
-  //             content = agent.system_prompt;
-  //           },
-  //           // We need to properly format the user messages
-  //           // This assumes the last message is what we want to send
-  //           {
-  //             role = #user;
-  //             content = finalPrompt;
-  //           },
-  //         ],
-  //       );
+        let response = await LLM.chat(
+          #Llama3_1_8B
+        ).withMessages([
+          #system_ {
+            content = "You are the Mother AI assistant agent on Neuroverse. You should ONLY use the tools you have been given.";
+          },
+          #user {
+            content = finalPrompt;
+          },
+        ]).withTools([
+          LLM.tool("get_weather").withDescription("Get current weather for a location").withParameter(
+            LLM.parameter("location", #String).withDescription("The location to get weather for").isRequired()
+          ).build(),
+          LLM.tool("get_p2pkh_address").withDescription("Use this tool/function to get, create or generate a bitcoin wallet address").build(),
+        ]).send();
 
-  //       // Store the user message and assistant response in history
-  //       storeMessage(caller, agentId, userMessage);
-  //       let assistantMessage : Types.Message = {
-  //         role = #assistant;
-  //         content = response;
-  //         timestamp = timestamp;
-  //       };
-  //       storeMessage(caller, agentId, assistantMessage);
+        // Check if the LLM wants to use any tools
+        switch (response.message.tool_calls.size()) {
+          case (0) {
+            // No tool calls - LLM provided a direct response
+            switch (response.message.content) {
+              case (?content) { content };
+              case null { "No response received" };
+            };
+          };
+          case (_) {
+            // Process tool calls
+            var toolResults : [LLM.ChatMessage] = [];
 
-  //       response;
-  //     };
-  //     case null { "Agent not found." };
-  //   };
-  // };
+            for (toolCall in response.message.tool_calls.vals()) {
+              let result = switch (toolCall.function.name) {
+                case ("get_weather") {
+                  let location = Helpers.getToolParameter(toolCall.function.arguments, "location");
+                  await get_weather(location);
+                };
+                case ("get_p2pkh_address") {
+                  await get_p2pkh_address();
+                };
+                case (_) {
+                  "Unknown tool: " # toolCall.function.name;
+                };
+              };
+
+              // Add tool result to conversation
+              toolResults := Array.append(
+                toolResults,
+                [
+                  #tool {
+                    content = result;
+                    tool_call_id = toolCall.id;
+                  }
+                ],
+              );
+            };
+
+            // Send tool results back to LLM for final response
+            let finalResponse = await LLM.chat(#Llama3_1_8B).withMessages(
+              Array.append(
+                [
+                  #system_ { content = "You are a helpful assistant." },
+                  #user { content = prompt },
+                  #assistant(response.message),
+                ],
+                toolResults,
+              )
+            ).send();
+
+            switch (finalResponse.message.content) {
+              case (?content) {
+                // Store the user message and assistant response in history
+                storeMessage(caller, agentId, userMessage);
+                let assistantMessage : Types.Message = {
+                  role = #assistant;
+                  content = content;
+                  timestamp = timestamp;
+                };
+                storeMessage(caller, agentId, assistantMessage);
+                content;
+              };
+              case null { "No final response received" };
+            };
+          };
+        };
+
+      };
+      case null { "Agent not found." };
+    };
+  };
 
   public query (message) func whoami() : async Principal {
     message.caller;
