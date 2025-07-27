@@ -43,33 +43,7 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
         timestamp: new Date(),
       };
 
-      setMessages([
-        greeting,
-        {
-          id: "greeting",
-          role: "assistant" as const,
-          content: `Hello! I'm ${agent.name}, your ${agent.category}. How can I help you today?`,
-          timestamp: new Date(),
-        },
-        {
-          id: "greeting",
-          role: "user" as const,
-          content: `Hello! I'm ${agent.name}, your ${agent.category}. How can I help you today?`,
-          timestamp: new Date(),
-        },
-        {
-          id: "greeting",
-          role: "assistant" as const,
-          content: `Hello! I'm ${agent.name}, your ${agent.category}. How can I help you today?`,
-          timestamp: new Date(),
-        },
-        {
-          id: "greeting",
-          role: "assistant" as const,
-          content: `Hello! I'm ${agent.name}, your ${agent.category}. How can I help you today?`,
-          timestamp: new Date(),
-        },
-      ]);
+      setMessages([greeting]);
     } else {
       // Reset conversation when modal closes
       setMessages([]);
@@ -102,7 +76,10 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
       const { response, conversationId: newConversationId } =
         await conversationService.sendMessage(
           agent.id.toString(),
-          inputValue,
+          `
+          ${messages.join(", ").toString()}
+          Prompt: ${inputValue}
+          `,
           conversationId
         );
 
@@ -132,7 +109,7 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col glassmorphic border-neon-blue/20">
+      <DialogContent className="max-w-4xl min-h-0 h-full max-h-[90vh] flex flex-col glassmorphic border-neon-blue/20">
         <DialogHeader className="h-fit">
           <DialogTitle className="flex items-center gap-3">
             <span className="holographic-text text-xl">{agent.name}</span>
@@ -140,9 +117,9 @@ const ChatModal = ({ agent, isOpen, setIsOpen }: ChatModalProps) => {
         </DialogHeader>
 
         {/* BODY CONTENT */}
-        <div className="flex flex-col flex-1 h-full">
+        <div className="flex flex-col flex-1 min-h-0">
           {/* Scrollable Area */}
-          <ScrollArea className="flex-1 h-full overflow-y-auto ">
+          <ScrollArea className="flex-1 overflow-y-auto ">
             <div className="space-y-4">
               {messages.map((message) => (
                 <div

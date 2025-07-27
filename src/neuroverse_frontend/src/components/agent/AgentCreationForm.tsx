@@ -150,6 +150,7 @@ const AgentCreationForm = () => {
         formData.description,
         formData.systemPrompt,
         formData.isFree,
+        true,
         BigInt(formData.price),
         principal,
         formData.tools.length > 0,
@@ -466,7 +467,7 @@ const AgentCreationForm = () => {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full font-bold bg-neon-purple/80 hover:bg-neon-purple text-white disabled:bg-slate-300"
+                className="w-full font-bold bg-neon-purple/80 hover:bg-neon-purple text-white disabled:bg-slate-500 disabled:cursor-not-allowed"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -474,7 +475,7 @@ const AgentCreationForm = () => {
                 ) : (
                   <Rocket className="h-5 w-5" />
                 )}
-                Deploy Agent to NeuroVerse
+                Deploy Agent
               </Button>
             ) : (
               <AuthBtn className="w-full" />

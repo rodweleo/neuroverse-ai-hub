@@ -18,8 +18,9 @@ import P2trKeyOnly "P2trKeyOnly";
 import P2tr "P2tr";
 import Helpers "Helpers";
 import ToolRegistry "ToolRegistry";
+import Tool "./tool";
 
-actor NeuroVerse {
+persistent actor NeuroVerse {
 
   /// The Bitcoin network to connect to.
   ///
@@ -27,15 +28,15 @@ actor NeuroVerse {
   /// When deploying to the IC this should be `testnet`.
   /// `mainnet` is currently unsupported.
   // Set the network here: #regtest for local, #testnet for IC
-  let network : Types.Network = #regtest;
-  stable let NETWORK : Types.Network = network;
+  transient let network : Types.Network = #regtest;
+  let NETWORK : Types.Network = network;
 
   /// The derivation path to use for ECDSA secp256k1 or Schnorr BIP340/BIP341 key
   /// derivation.
-  let DERIVATION_PATH : [[Nat8]] = [];
+  transient let DERIVATION_PATH : [[Nat8]] = [];
 
   // The ECDSA key name.
-  let KEY_NAME : Text = switch NETWORK {
+  transient let KEY_NAME : Text = switch NETWORK {
     // For local development, we use a special test key with dfx.
     case (#regtest) "dfx_test_key";
     // On the IC we're using a test ECDSA key.
@@ -44,34 +45,33 @@ actor NeuroVerse {
 
   // Threshold signing APIs instantiated with the management canister ID. Can be
   // replaced for cheaper testing.
-  var ecdsa_canister_actor : Types.EcdsaCanisterActor = actor ("aaaaa-aa");
-  var schnorr_canister_actor : Types.SchnorrCanisterActor = actor ("aaaaa-aa");
+  transient var ecdsa_canister_actor : Types.EcdsaCanisterActor = actor ("aaaaa-aa");
+  transient var schnorr_canister_actor : Types.SchnorrCanisterActor = actor ("aaaaa-aa");
 
-  private var agents = HashMap.HashMap<Text, Types.Agent>(10, Text.equal, Text.hash);
-  private var userAgents = HashMap.HashMap<Principal, Types.AgentsMap>(
+  private transient var agents = HashMap.HashMap<Text, Types.Agent>(10, Text.equal, Text.hash);
+  private transient var userAgents = HashMap.HashMap<Principal, Types.AgentsMap>(
     10,
     Principal.equal,
     Principal.hash,
   );
 
-  private stable var stableAgents : [(Text, Types.Agent)] = [];
-  private stable var agentStableStore : [Types.AgentEntry] = [];
-  private stable var toolsStable : [(Text, ToolRegistry.Tool)] = [];
+  private var stableAgents : [(Text, Types.Agent)] = [];
+  private var agentStableStore : [Types.AgentEntry] = [];
+  private var toolsStable : [(Text, ToolRegistry.Tool)] = [];
 
-  private var conversationHistory : HashMap.HashMap<(Principal, Text), [Types.Message]> = HashMap.HashMap<(Principal, Text), [Types.Message]>(10, func((a, b), (c, d)) { a == c and b == d }, func((a, b)) { Principal.hash(a) +% Text.hash(b) });
-  private var tools = HashMap.HashMap<Text, ToolRegistry.Tool>(32, Text.equal, Text.hash);
+  private transient var conversationHistory : HashMap.HashMap<(Principal, Text), [Types.Message]> = HashMap.HashMap<(Principal, Text), [Types.Message]>(10, func((a, b), (c, d)) { a == c and b == d }, func((a, b)) { Principal.hash(a) +% Text.hash(b) });
+  private transient var tools = HashMap.HashMap<Text, ToolRegistry.Tool>(32, Text.equal, Text.hash);
 
   public func prompt(prompt : Text) : async Text {
     await LLM.prompt(#Llama3_1_8B, prompt);
   };
 
-  //replace the input with <messages : [LLM.ChatMessage]>
   public func chat(userInput : Text) : async Text {
     let response = await LLM.chat(
       #Llama3_1_8B
     ).withMessages([
       #system_ {
-        content = "You are the Mother AI assistant agent on Neuroverse. You should ONLY use the tools you have been given.";
+        content = "You are the assistant agent on Neuroverse. You should ONLY use the tools you have been given.";
       },
       #user {
         content = userInput;
@@ -142,7 +142,7 @@ actor NeuroVerse {
     };
   };
 
-  public func createAgent(agentId : Text, name : Text, category : Text, description : Text, system_prompt : Text, isFree : Bool, price : Nat, vendor : Principal, has_tools : Bool, tools : [Text]) : async () {
+  public func createAgent(agentId : Text, name : Text, category : Text, description : Text, system_prompt : Text, isFree : Bool, isPublic : Bool, price : Nat, vendor : Principal, has_tools : Bool, tools : [Text]) : async () {
 
     let agent : Types.Agent = {
       id = agentId;
@@ -153,6 +153,7 @@ actor NeuroVerse {
       has_tools = has_tools;
       tools = tools;
       isFree = isFree;
+      isPublic = isPublic;
       price = price;
       created_by = vendor;
     };
@@ -242,9 +243,9 @@ actor NeuroVerse {
 
   public shared func chatWithAgent(agentId : Text, prompt : Text) : async Text {
     let caller = Principal.fromActor(NeuroVerse);
+    let agentOpt = await getAgentById(agentId);
 
-    // Check if the agent exists in the global agents map
-    switch (agents.get(agentId)) {
+    switch (agentOpt) {
       case (?agent) {
         let timestamp = Time.now();
 
@@ -274,7 +275,7 @@ actor NeuroVerse {
 
         // Convert the array of Message objects to a string
         let historyAsText = Text.join(
-          "\n", // separator between messages
+          "\n",
           Array.map<Types.Message, Text>(
             fullHistory,
             func(msg : Types.Message) : Text {
@@ -294,21 +295,19 @@ actor NeuroVerse {
         // Now you can concatenate with other text if needed
         let finalPrompt = "Conversation history:\n" # historyAsText # "User prompt:" # prompt;
 
+        // Fetch the tools for the agent
+        let agentTools : [Tool.Tool] = await mapAgentToolsToLLMTools(agentId);
+
         let response = await LLM.chat(
           #Llama3_1_8B
         ).withMessages([
           #system_ {
-            content = "You are the Mother AI assistant agent on Neuroverse. You should ONLY use the tools you have been given.";
+            content = agent.system_prompt # "Ensure you check if you have tools attached and use them accordingly for optimal performance and output.";
           },
           #user {
             content = finalPrompt;
           },
-        ]).withTools([
-          LLM.tool("get_weather").withDescription("Get current weather for a location").withParameter(
-            LLM.parameter("location", #String).withDescription("The location to get weather for").isRequired()
-          ).build(),
-          LLM.tool("get_p2pkh_address").withDescription("Use this tool/function to get, create or generate a bitcoin wallet address").build(),
-        ]).send();
+        ]).withTools(agentTools).send();
 
         // Check if the LLM wants to use any tools
         switch (response.message.tool_calls.size()) {
@@ -353,7 +352,7 @@ actor NeuroVerse {
             let finalResponse = await LLM.chat(#Llama3_1_8B).withMessages(
               Array.append(
                 [
-                  #system_ { content = "You are a helpful assistant." },
+                  #system_ { content = agent.system_prompt },
                   #user { content = prompt },
                   #assistant(response.message),
                 ],
@@ -385,6 +384,38 @@ actor NeuroVerse {
 
   public query (message) func whoami() : async Principal {
     message.caller;
+  };
+
+  public shared func mapAgentToolsToLLMTools(agentId : Text) : async [Tool.Tool] {
+    let agentOpt = await getAgentById(agentId);
+
+    switch (agentOpt) {
+      case (?agent) {
+        // Map each agent tool to your Tool type using the builder pattern
+        Array.map<ToolRegistry.Tool, Tool.Tool>(
+          agent.tools,
+          func(tool : ToolRegistry.Tool) : Tool.Tool {
+            var builder = Tool.ToolBuilder(tool.name);
+            if (tool.description != "") {
+              builder := builder.withDescription(tool.description);
+            };
+            // Add parameters if present
+            for (param in tool.parameters.vals()) {
+              var paramBuilder = Tool.ParameterBuilder(param.name, Tool.textToParameterType(param.type_));
+              if (param.description != "") {
+                paramBuilder := paramBuilder.withDescription(param.description);
+              };
+              if (param.required) {
+                paramBuilder := paramBuilder.isRequired();
+              };
+              builder := builder.withParameter(paramBuilder);
+            };
+            builder.build();
+          },
+        );
+      };
+      case null { [] };
+    };
   };
 
   public func get_weather(location : Text) : async Text {

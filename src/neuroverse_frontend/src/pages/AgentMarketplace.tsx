@@ -1,12 +1,6 @@
 import AgentDiscovery from "@/components/marketplace/AgentDiscovery";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Store, TrendingUp, Users, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import useAllAgents from "@/hooks/useAllAgents";
@@ -21,7 +15,7 @@ const AgentMarketplace = () => {
       {/* Header */}
       <header className="space-y-4 flex flex-wrap items-end justify-between h-60 bg-gradient-to-r from-neon-blue/30 to-neon-purple/30 p-6 rounded-lg shadow-lg">
         <div className="space-y-2">
-          <h1 className="text-4xl sm:text-6xl font-orbitron font-bold holographic-text py-2">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-orbitron font-bold holographic-text py-2">
             Agent Marketplace
           </h1>
           <p className="text-md sm:text-lg text-muted-foreground">
@@ -74,7 +68,7 @@ const AgentMarketplace = () => {
           </CardContent>
         </Card>
 
-        <Card className="glassmorphic border-acid-green/20">
+        <Card className="hidden glassmorphic border-acid-green/20">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Interactions Today
