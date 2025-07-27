@@ -1,13 +1,12 @@
-
-import { aiService, type AgentConfig } from './aiService';
-import { agents } from '@/data/agents';
+import { aiService, type AgentConfig } from "./aiService";
+import { agents } from "@/data/agents";
 
 interface ConversationMemory {
   conversationId: string;
   agentId: string;
   messages: Array<{
     id: string;
-    role: 'user' | 'assistant';
+    role: "user" | "assistant";
     content: string;
     timestamp: Date;
   }>;
@@ -22,12 +21,12 @@ class ConversationService {
 
   constructor() {
     this.loadConversations();
-    this.useRealAI = localStorage.getItem('use_real_ai') === 'true';
+    this.useRealAI = localStorage.getItem("use_real_ai") === "true";
   }
 
   setUseRealAI(enabled: boolean) {
     this.useRealAI = enabled;
-    localStorage.setItem('use_real_ai', enabled.toString());
+    localStorage.setItem("use_real_ai", enabled.toString());
   }
 
   getUseRealAI(): boolean {
@@ -35,7 +34,7 @@ class ConversationService {
   }
 
   private loadConversations() {
-    const stored = localStorage.getItem('neuroberse_conversations');
+    const stored = localStorage.getItem("neuroverse_conversations");
     if (stored) {
       try {
         const data = JSON.parse(stored);
@@ -46,12 +45,12 @@ class ConversationService {
             lastActive: new Date(conv.lastActive),
             messages: conv.messages.map((msg: any) => ({
               ...msg,
-              timestamp: new Date(msg.timestamp)
-            }))
+              timestamp: new Date(msg.timestamp),
+            })),
           });
         });
       } catch (error) {
-        console.error('Failed to load conversations:', error);
+        console.error("Failed to load conversations:", error);
       }
     }
   }
@@ -61,7 +60,7 @@ class ConversationService {
     this.conversations.forEach((conv, id) => {
       data[id] = conv;
     });
-    localStorage.setItem('neuroberse_conversations', JSON.stringify(data));
+    localStorage.setItem("neuroverse_conversations", JSON.stringify(data));
   }
 
   async sendMessage(
@@ -80,16 +79,16 @@ class ConversationService {
         messages: [],
         context: {},
         createdAt: new Date(),
-        lastActive: new Date()
+        lastActive: new Date(),
       };
     }
 
     // Add user message
     const userMessage = {
       id: this.generateId(),
-      role: 'user' as const,
+      role: "user" as const,
       content: message,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
     conversation.messages.push(userMessage);
 
@@ -97,22 +96,21 @@ class ConversationService {
     try {
       aiResponse = await aiService.generateResponse(agentId, message);
     } catch (error) {
-      console.error('AI service error:', error);
-      aiResponse = 'Something went wrong. Please try again.'
+      console.error("AI service error:", error);
+      aiResponse = "Something went wrong. Please try again.";
     }
 
     const assistantMessage = {
       id: this.generateId(),
-      role: 'assistant' as const,
+      role: "assistant" as const,
       content: aiResponse,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
     conversation.messages.push(assistantMessage);
 
     conversation.lastActive = new Date();
     this.conversations.set(convId, conversation);
     this.saveConversations();
-
 
     return { response: aiResponse, conversationId: convId };
   }
@@ -122,8 +120,9 @@ class ConversationService {
   }
 
   getUserConversations(): ConversationMemory[] {
-    return Array.from(this.conversations.values())
-      .sort((a, b) => b.lastActive.getTime() - a.lastActive.getTime());
+    return Array.from(this.conversations.values()).sort(
+      (a, b) => b.lastActive.getTime() - a.lastActive.getTime()
+    );
   }
 
   deleteConversation(conversationId: string) {
