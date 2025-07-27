@@ -1,5 +1,6 @@
 import Curves "mo:bitcoin/ec/Curves";
 import HashMap "mo:base/HashMap";
+import ToolRegistry "ToolRegistry";
 
 module Types {
     public type Agent = {
@@ -8,6 +9,20 @@ module Types {
         category : Text;
         description : Text;
         system_prompt : Text;
+        has_tools : Bool;
+        tools : [Text];
+        isFree : Bool;
+        price : Nat;
+        created_by : Principal;
+    };
+    public type FullAgent = {
+        id : Text;
+        name : Text;
+        category : Text;
+        description : Text;
+        system_prompt : Text;
+        has_tools : Bool;
+        tools : [ToolRegistry.Tool];
         isFree : Bool;
         price : Nat;
         created_by : Principal;

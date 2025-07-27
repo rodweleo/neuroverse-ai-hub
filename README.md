@@ -1,50 +1,76 @@
-# Neuroverse AI Hub
+# NeuroVerse AI Hub
 
-A decentralized AI platform built on the Internet Computer Protocol (ICP) that allows users to manage and interact with AI models and files.
+A decentralized AI agent marketplace built on the Internet Computer Protocol (ICP) that enables users to create, deploy, and monetize AI agents in a fully decentralized environment.
 
-## Features
+## Overview
 
-- File management system with chunked file uploads
-- User authentication and authorization
-- AI model interaction capabilities
-- Decentralized storage using Internet Computer
+NeuroVerse AI Hub addresses the centralization problem in AI development by providing a platform where developers and users can create, share, and monetize AI agents without relying on traditional cloud infrastructure. 
+Built on ICP's blockchain technology, it ensures permanent availability, transparent transactions, and true ownership of AI assets.
 
-## Project Structure
+## Project Description
 
-```
-├── src/
-│   ├── declarations/     # Auto-generated canister declarations
-│   ├── neuroverse_backend/
-│   │   ├── FileVault.mo  # File management system
-│   │   └── main.mo       # Main backend canister
-│   └── neuroverse_frontend/
-├── .dfx/                 # DFX local state
-├── .mops/                # Motoko package manager dependencies
-└── dfx.json              # Project configuration
-```
+NeuroVerse combines advanced AI capabilities with blockchain technology to create a decentralized marketplace for AI agents. Users can:
+- Deploy custom AI agents with specialized knowledge and capabilities
+- Interact with existing agents through a modern web interface
+- Monetize their AI creations through direct token payments
+- Maintain full ownership and control of their data and agents
 
-## Prerequisites
+## Key Features
 
-- [DFX SDK](https://internetcomputer.org/docs/current/developer-docs/setup/install)
-- Node.js and npm
-- Internet Computer Wallet
+- AI Agent Creation & Deployment
+  - Custom knowledge base integration
+  - Configurable agent personalities
+  - Template-based quick start options
+  
+- Monetization System
+  - Direct ICP token earnings
+  - Usage-based pricing model
+  - Transparent transaction history
+  
+- Decentralized Infrastructure
+  - Blockchain-based data storage
+  - Censorship-resistant deployment
+  - User-owned agents and data
+  
+- Modern User Interface
+  - Responsive design
+  - Real-time chat interactions
+  - Holographic visual elements
+
+## Tech Stack
+
+- **Frontend**: 
+  - React with TypeScript
+  - TailwindCSS for styling
+  - Vite for development
+
+- **Backend**:
+  - Internet Computer Protocol (ICP)
+  - Motoko programming language
+  - MOPS package manager
+
+- **AI/ML**:
+  - LLM integration
+  - Knowledge base management
+  - Document chunking system
 
 ## Installation
 
-1. Clone the repository:
+1. Install prerequisites:
+   - [DFX SDK](https://internetcomputer.org/docs/current/developer-docs/setup/install)
+   - Node.js and npm
+   - Internet Computer Wallet
+
+2. Clone and setup:
 ```bash
 git clone https://github.com/yourusername/neuroverse.git
 cd neuroverse
-```
-
-2. Install dependencies:
-```bash
 npm install
 ```
 
-## Local Development
+## Usage
 
-1. Start the local Internet Computer replica:
+1. Start the local ICP replica:
 ```bash
 dfx start --background
 ```
@@ -54,52 +80,7 @@ dfx start --background
 dfx deploy
 ```
 
-3. Start the frontend development server:
+3. Start development server:
 ```bash
 npm start
 ```
-
-The application will be available at:
-- Frontend: http://localhost:8080
-- Canister Interface: http://localhost:4943?canisterId={asset_canister_id}
-
-## Development Workflow
-
-### Backend Development
-
-- Make changes to Motoko files in `src/neuroverse_backend/`
-- Regenerate candid interfaces:
-```bash
-npm run generate
-```
-
-### Frontend Development
-
-The frontend development server proxies API requests to port 4943 where the local replica runs.
-
-## Environment Variables
-
-For production deployment, you'll need to handle the `DFX_NETWORK` environment variable:
-
-- Set `DFX_NETWORK` to `ic` if using Webpack
-- Configure environment override in `dfx.json`:
-```json
-{
-  "canisters": {
-    "asset_canister_id": {
-      "declarations": {
-        "env_override": "ic"
-      }
-    }
-  }
-}
-```
-
-## Documentation
-
-For more information, see:
-- [Internet Computer Development Documentation](https://internetcomputer.org/docs/current/developer-docs/setup/deploy-locally)
-- [Motoko Programming Language Guide](https://internetcomputer.org/docs/current/motoko/main/motoko)
-- [Motoko Language Reference](https://internetcomputer.org/docs/current/motoko/main/language-manual)
-
-## License

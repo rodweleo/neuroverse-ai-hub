@@ -1,4 +1,5 @@
 import LLM "mo:llm";
+import IC "ic:aaaaa-aa";
 import HashMap "mo:base/HashMap";
 import Types "Types";
 import Principal "mo:base/Principal";
@@ -6,12 +7,17 @@ import Iter "mo:base/Iter";
 import Text "mo:base/Text";
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
+import Buffer "mo:base/Buffer";
+import Error "mo:base/Error";
+import Time "mo:base/Time";
+import Int "mo:base/Int";
 import BitcoinAPI "BitcoinAPI";
 import Utils "Utils";
 import P2pkh "P2pkh";
 import P2trKeyOnly "P2trKeyOnly";
 import P2tr "P2tr";
 import Helpers "Helpers";
+import ToolRegistry "ToolRegistry";
 
 actor NeuroVerse {
 
@@ -50,9 +56,10 @@ actor NeuroVerse {
 
   private stable var stableAgents : [(Text, Types.Agent)] = [];
   private stable var agentStableStore : [Types.AgentEntry] = [];
+  private stable var toolsStable : [(Text, ToolRegistry.Tool)] = [];
 
-  // Assume you have a map to store conversation history per (user, agent)
   private var conversationHistory : HashMap.HashMap<(Principal, Text), [Types.Message]> = HashMap.HashMap<(Principal, Text), [Types.Message]>(10, func((a, b), (c, d)) { a == c and b == d }, func((a, b)) { Principal.hash(a) +% Text.hash(b) });
+  private var tools = HashMap.HashMap<Text, ToolRegistry.Tool>(32, Text.equal, Text.hash);
 
   public func prompt(prompt : Text) : async Text {
     await LLM.prompt(#Llama3_1_8B, prompt);
@@ -135,7 +142,7 @@ actor NeuroVerse {
     };
   };
 
-  public func createAgent(agentId : Text, name : Text, category : Text, description : Text, system_prompt : Text, isFree : Bool, price : Nat, vendor : Principal) : async () {
+  public func createAgent(agentId : Text, name : Text, category : Text, description : Text, system_prompt : Text, isFree : Bool, price : Nat, vendor : Principal, has_tools : Bool, tools : [Text]) : async () {
 
     let agent : Types.Agent = {
       id = agentId;
@@ -143,6 +150,8 @@ actor NeuroVerse {
       category = category;
       description = description;
       system_prompt = system_prompt;
+      has_tools = has_tools;
+      tools = tools;
       isFree = isFree;
       price = price;
       created_by = vendor;
@@ -169,6 +178,39 @@ actor NeuroVerse {
       };
     };
     result;
+  };
+
+  public shared func getAgentById(agentId : Text) : async ?Types.FullAgent {
+    let agentOpt = agents.get(agentId);
+    switch (agentOpt) {
+      case null { null };
+      case (?agent) {
+
+        let toolBuffer = Buffer.Buffer<ToolRegistry.Tool>(agent.tools.size());
+
+        for (toolId in agent.tools.vals()) {
+          switch (tools.get(toolId)) {
+            case (?tool) { toolBuffer.add(tool) };
+            case null {};
+          };
+        };
+
+        let fullTools = Buffer.toArray(toolBuffer);
+        return ?{
+          id = agent.id;
+          name = agent.name;
+          category = agent.category;
+          description = agent.description;
+          system_prompt = agent.system_prompt;
+          has_tools = agent.has_tools;
+          isFree = agent.isFree;
+          price = agent.price;
+          created_by = agent.created_by;
+          tools = fullTools;
+        };
+
+      };
+    };
   };
 
   public func getAgentsForUser(user : Principal) : async [Types.Agent] {
@@ -198,91 +240,148 @@ actor NeuroVerse {
     conversationHistory.put((user, agentId), Array.append<Types.Message>(history, [message]));
   };
 
-  // public shared func chatWithAgent(agentId : Text, prompt : Text) : async Text {
-  //   let caller = Principal.fromActor(NeuroVerse);
+  public shared func chatWithAgent(agentId : Text, prompt : Text) : async Text {
+    let caller = Principal.fromActor(NeuroVerse);
 
-  //   // Check if the agent exists in the global agents map
-  //   switch (agents.get(agentId)) {
-  //     case (?agent) {
-  //       let timestamp = Time.now();
+    // Check if the agent exists in the global agents map
+    switch (agents.get(agentId)) {
+      case (?agent) {
+        let timestamp = Time.now();
 
-  //       // Retrieve conversation history for (caller, agentId)
-  //       let history = getHistory(caller, agentId);
+        // Retrieve conversation history for (caller, agentId)
+        let history = getHistory(caller, agentId);
 
-  //       // Create the new user message
-  //       let userMessage : Types.Message = {
-  //         role = #user;
-  //         content = prompt;
-  //         timestamp = timestamp;
-  //       };
+        // Create the new user message
+        let userMessage : Types.Message = {
+          role = #user;
+          content = prompt;
+          timestamp = timestamp;
+        };
 
-  //       // If history is empty, start with the system prompt
-  //       let fullHistory = if (history.size() == 0) {
-  //         Array.append(
-  //           [{
-  //             role = #system_;
-  //             content = agent.system_prompt;
-  //             timestamp = timestamp;
-  //           }],
-  //           [userMessage],
-  //         );
-  //       } else {
-  //         Array.append(history, [userMessage]);
-  //       };
+        // If history is empty, start with the system prompt
+        let fullHistory = if (history.size() == 0) {
+          Array.append(
+            [{
+              role = #system_;
+              content = agent.system_prompt;
+              timestamp = timestamp;
+            }],
+            [userMessage],
+          );
+        } else {
+          Array.append(history, [userMessage]);
+        };
 
-  //       // Convert the array of Message objects to a string
-  //       let historyAsText = Text.join(
-  //         "\n", // separator between messages
-  //         Array.map<Types.Message, Text>(
-  //           fullHistory,
-  //           func(msg : Types.Message) : Text {
-  //             // Convert each Message object to a string representation
-  //             let roleText = switch (msg.role) {
-  //               case (#system_) "System";
-  //               case (#user) "User";
-  //               case (#assistant) "Assistant";
-  //             };
+        // Convert the array of Message objects to a string
+        let historyAsText = Text.join(
+          "\n", // separator between messages
+          Array.map<Types.Message, Text>(
+            fullHistory,
+            func(msg : Types.Message) : Text {
+              // Convert each Message object to a string representation
+              let roleText = switch (msg.role) {
+                case (#system_) "System";
+                case (#user) "User";
+                case (#assistant) "Assistant";
+              };
 
-  //             // Combine the fields into a single string for each message
-  //             roleText # ": " # msg.content # " (at " # Int.toText(msg.timestamp) # ")";
-  //           },
-  //         ).vals(),
-  //       );
+              // Combine the fields into a single string for each message
+              roleText # ": " # msg.content # " (at " # Int.toText(msg.timestamp) # ")";
+            },
+          ).vals(),
+        );
 
-  //       // Now you can concatenate with other text if needed
-  //       let finalPrompt = "Conversation history:\n" # historyAsText # "User prompt:" # prompt;
+        // Now you can concatenate with other text if needed
+        let finalPrompt = "Conversation history:\n" # historyAsText # "User prompt:" # prompt;
 
-  //       // Call the LLM with the full context
-  //       let response = await LLM.chat(
-  //         #Llama3_1_8B,
-  //         [
-  //           {
-  //             role = #system_;
-  //             content = agent.system_prompt;
-  //           },
-  //           // We need to properly format the user messages
-  //           // This assumes the last message is what we want to send
-  //           {
-  //             role = #user;
-  //             content = finalPrompt;
-  //           },
-  //         ],
-  //       );
+        let response = await LLM.chat(
+          #Llama3_1_8B
+        ).withMessages([
+          #system_ {
+            content = "You are the Mother AI assistant agent on Neuroverse. You should ONLY use the tools you have been given.";
+          },
+          #user {
+            content = finalPrompt;
+          },
+        ]).withTools([
+          LLM.tool("get_weather").withDescription("Get current weather for a location").withParameter(
+            LLM.parameter("location", #String).withDescription("The location to get weather for").isRequired()
+          ).build(),
+          LLM.tool("get_p2pkh_address").withDescription("Use this tool/function to get, create or generate a bitcoin wallet address").build(),
+        ]).send();
 
-  //       // Store the user message and assistant response in history
-  //       storeMessage(caller, agentId, userMessage);
-  //       let assistantMessage : Types.Message = {
-  //         role = #assistant;
-  //         content = response;
-  //         timestamp = timestamp;
-  //       };
-  //       storeMessage(caller, agentId, assistantMessage);
+        // Check if the LLM wants to use any tools
+        switch (response.message.tool_calls.size()) {
+          case (0) {
+            // No tool calls - LLM provided a direct response
+            switch (response.message.content) {
+              case (?content) { content };
+              case null { "No response received" };
+            };
+          };
+          case (_) {
+            // Process tool calls
+            var toolResults : [LLM.ChatMessage] = [];
 
-  //       response;
-  //     };
-  //     case null { "Agent not found." };
-  //   };
-  // };
+            for (toolCall in response.message.tool_calls.vals()) {
+              let result = switch (toolCall.function.name) {
+                case ("get_weather") {
+                  let location = Helpers.getToolParameter(toolCall.function.arguments, "location");
+                  await get_weather(location);
+                };
+                case ("get_p2pkh_address") {
+                  await get_p2pkh_address();
+                };
+                case (_) {
+                  "Unknown tool: " # toolCall.function.name;
+                };
+              };
+
+              // Add tool result to conversation
+              toolResults := Array.append(
+                toolResults,
+                [
+                  #tool {
+                    content = result;
+                    tool_call_id = toolCall.id;
+                  }
+                ],
+              );
+            };
+
+            // Send tool results back to LLM for final response
+            let finalResponse = await LLM.chat(#Llama3_1_8B).withMessages(
+              Array.append(
+                [
+                  #system_ { content = "You are a helpful assistant." },
+                  #user { content = prompt },
+                  #assistant(response.message),
+                ],
+                toolResults,
+              )
+            ).send();
+
+            switch (finalResponse.message.content) {
+              case (?content) {
+                // Store the user message and assistant response in history
+                storeMessage(caller, agentId, userMessage);
+                let assistantMessage : Types.Message = {
+                  role = #assistant;
+                  content = content;
+                  timestamp = timestamp;
+                };
+                storeMessage(caller, agentId, assistantMessage);
+                content;
+              };
+              case null { "No final response received" };
+            };
+          };
+        };
+
+      };
+      case null { "Agent not found." };
+    };
+  };
 
   public query (message) func whoami() : async Principal {
     message.caller;
@@ -293,6 +392,24 @@ actor NeuroVerse {
   };
 
   /** IMPLEMENTATION OF BITCOIN **/
+  public shared (msg) func getUserBtcAddress() : async {
+    #Ok : { public_key : Blob };
+    #Err : Text;
+  } {
+    let caller = Principal.toBlob(msg.caller);
+
+    try {
+      let { public_key } = await IC.ecdsa_public_key({
+        canister_id = null;
+        derivation_path = [caller];
+        key_id = { curve = #secp256k1; name = "test_key_1" };
+      });
+      #Ok({ public_key });
+    } catch (err) {
+      #Err(Error.message(err));
+    };
+  };
+
   /// Returns the balance of the given Bitcoin address.
   public func get_balance(address : Types.BitcoinAddress) : async Types.Satoshi {
     await BitcoinAPI.get_balance(NETWORK, address);
@@ -359,6 +476,18 @@ actor NeuroVerse {
     Array.flatten([DERIVATION_PATH, [Blob.toArray(suffix)]]);
   };
 
+  /**TOOL REGISTRY**/
+  public func registerTool(tool : ToolRegistry.Tool) : async () {
+    tools.put(tool.id, tool);
+  };
+
+  public func getTools() : async [ToolRegistry.Tool] {
+    Iter.toArray<ToolRegistry.Tool>(tools.vals());
+  };
+
+  public func getToolById(id : Text) : async ?ToolRegistry.Tool {
+    tools.get(id);
+  };
   /**PERSISTING STORAGE**/
 
   system func preupgrade() {
@@ -369,6 +498,9 @@ actor NeuroVerse {
       let agentList = Iter.toArray(agentMap.entries());
       agentStableStore := Array.append(agentStableStore, [{ user = user; agents = agentList }]);
     };
+
+    /**TOOL DATA PERSISTENCE**/
+    toolsStable := Iter.toArray(tools.entries());
   };
 
   system func postupgrade() {
@@ -389,6 +521,12 @@ actor NeuroVerse {
       userAgents.put(entry.user, agentMap);
     };
     agents := HashMap.fromIter<Text, Types.Agent>(stableAgents.vals(), 10, Text.equal, Text.hash);
+
+    /**TOOL DATA PERSISTENCE**/
+    for ((id, tool) in toolsStable.vals()) {
+      tools.put(id, tool);
+    };
+    toolsStable := [];
   }
 
 };

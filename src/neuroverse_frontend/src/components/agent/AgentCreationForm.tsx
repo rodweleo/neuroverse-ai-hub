@@ -1,21 +1,27 @@
-
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Rocket, Brain, Stethoscope, GraduationCap, Bot, Palette, Code, Heart, Settings, FileText } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import KnowledgeBaseManager, { KnowledgeConfig } from './KnowledgeBaseManager';
-import { KnowledgeDocument } from './DocumentUpload';
-import NeuroverseBackendActor from "@/utils/NeuroverseBackendActor"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Loader2 } from "lucide-react"
-import { useAuth } from "@/contexts/use-auth-client"
-import AuthBtn from '@/components/auth/auth-btn';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Rocket, Settings, FileText, Puzzle, ALargeSmall } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import KnowledgeBaseManager, { KnowledgeConfig } from "./KnowledgeBaseManager";
+import { KnowledgeDocument } from "./DocumentUpload";
+import NeuroverseBackendActor from "@/utils/NeuroverseBackendActor";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/use-auth-client";
+import AuthBtn from "@/components/auth/auth-btn";
+import { useAllTools } from "@/hooks/use-all-tools";
+import { Link } from "react-router-dom";
 
 interface AgentFormData {
   name: string;
@@ -30,18 +36,21 @@ interface AgentFormData {
   knowledgeBase: KnowledgeDocument[];
   knowledgeConfig: KnowledgeConfig;
   isFree: boolean;
+  tools: string[];
 }
 
 const AgentCreationForm = () => {
   const { principal, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { data: availableTools } = useAllTools();
+
   const [formData, setFormData] = useState<AgentFormData>({
-    name: '',
-    description: '',
-    category: '',
-    systemPrompt: '',
-    icon: 'Bot',
-    color: 'text-neon-blue',
+    name: "",
+    description: "",
+    category: "",
+    systemPrompt: "",
+    icon: "Bot",
+    color: "text-neon-blue",
     price: 0.1,
     temperature: 0.7,
     maxTokens: 1000,
@@ -51,88 +60,85 @@ const AgentCreationForm = () => {
       searchSensitivity: 0.7,
       citationsEnabled: true,
       chunkSize: 1000,
-      overlap: 200
+      overlap: 200,
     },
-    isFree: true
+    isFree: true,
+    tools: [],
   });
-  const [isLoading, setIsLoading] = useState(false)
-
-  const iconOptions = [
-    { value: 'Bot', label: 'Bot', icon: Bot },
-    { value: 'Brain', label: 'Brain', icon: Brain },
-    { value: 'Stethoscope', label: 'Medical', icon: Stethoscope },
-    { value: 'GraduationCap', label: 'Education', icon: GraduationCap },
-    { value: 'Palette', label: 'Creative', icon: Palette },
-    { value: 'Code', label: 'Technical', icon: Code },
-    { value: 'Heart', label: 'Support', icon: Heart }
-  ];
-
-  const colorOptions = [
-    { value: 'text-neon-blue', label: 'Neon Blue', preview: 'bg-neon-blue' },
-    { value: 'text-neon-purple', label: 'Neon Purple', preview: 'bg-neon-purple' },
-    { value: 'text-acid-green', label: 'Acid Green', preview: 'bg-acid-green' }
-  ];
+  const [isLoading, setIsLoading] = useState(false);
+  const [toolSearchQuery, setToolSearchQuery] = useState("");
 
   const roleTemplates = [
     {
-      role: 'Therapist',
-      prompt: 'You are a compassionate and empathetic therapist. Your goal is to listen actively, ask thoughtful questions, and guide users through their feelings. Never give direct medical advice, but help them find their own answers and coping strategies. Always be supportive and non-judgmental.',
-      icon: 'Stethoscope',
-      color: 'text-neon-purple'
+      role: "Therapist",
+      prompt:
+        "You are a compassionate and empathetic therapist. Your goal is to listen actively, ask thoughtful questions, and guide users through their feelings. Never give direct medical advice, but help them find their own answers and coping strategies. Always be supportive and non-judgmental.",
+      icon: "Stethoscope",
+      color: "text-neon-purple",
     },
     {
-      role: 'Tutor',
-      prompt: 'You are a knowledgeable and patient tutor. Explain complex concepts in simple, easy-to-understand ways. Use analogies, examples, and step-by-step breakdowns. Always be encouraging and adapt your teaching style to the student\'s learning pace.',
-      icon: 'GraduationCap',
-      color: 'text-acid-green'
+      role: "Tutor",
+      prompt:
+        "You are a knowledgeable and patient tutor. Explain complex concepts in simple, easy-to-understand ways. Use analogies, examples, and step-by-step breakdowns. Always be encouraging and adapt your teaching style to the student's learning pace.",
+      icon: "GraduationCap",
+      color: "text-acid-green",
     },
     {
-      role: 'Creative Writer',
-      prompt: 'You are an inspiring creative writing assistant. Help users craft compelling stories, improve their writing, and overcome creative blocks. Provide constructive feedback, suggest plot ideas, and help develop characters. Be imaginative and encouraging.',
-      icon: 'Palette',
-      color: 'text-neon-purple'
+      role: "Creative Writer",
+      prompt:
+        "You are an inspiring creative writing assistant. Help users craft compelling stories, improve their writing, and overcome creative blocks. Provide constructive feedback, suggest plot ideas, and help develop characters. Be imaginative and encouraging.",
+      icon: "Palette",
+      color: "text-neon-purple",
     },
     {
-      role: 'Code Mentor',
-      prompt: 'You are an experienced programming mentor. Help users learn to code, debug issues, and understand software development concepts. Explain code clearly, suggest best practices, and guide problem-solving. Be patient and encouraging with beginners.',
-      icon: 'Code',
-      color: 'text-neon-blue'
+      role: "Code Mentor",
+      prompt:
+        "You are an experienced programming mentor. Help users learn to code, debug issues, and understand software development concepts. Explain code clearly, suggest best practices, and guide problem-solving. Be patient and encouraging with beginners.",
+      icon: "Code",
+      color: "text-neon-blue",
     },
     {
-      role: 'Life Coach',
-      prompt: 'You are a supportive life coach focused on helping users achieve their goals and improve their well-being. Ask powerful questions, help identify obstacles, and guide users toward actionable steps. Be motivational and help build confidence.',
-      icon: 'Heart',
-      color: 'text-acid-green'
+      role: "Life Coach",
+      prompt:
+        "You are a supportive life coach focused on helping users achieve their goals and improve their well-being. Ask powerful questions, help identify obstacles, and guide users toward actionable steps. Be motivational and help build confidence.",
+      icon: "Heart",
+      color: "text-acid-green",
     },
     {
-      role: 'Research Assistant',
-      prompt: 'You are a thorough research assistant who helps users find information, analyze data, and understand complex topics. Provide accurate, well-sourced information and help break down research into digestible insights.',
-      icon: 'Brain',
-      color: 'text-neon-blue'
-    }
+      role: "Research Assistant",
+      prompt:
+        "You are a thorough research assistant who helps users find information, analyze data, and understand complex topics. Provide accurate, well-sourced information and help break down research into digestible insights.",
+      icon: "Brain",
+      color: "text-neon-blue",
+    },
   ];
 
-  const handleTemplateSelect = (template: typeof roleTemplates[0]) => {
-    setFormData(prev => ({
+  const handleTemplateSelect = (template: (typeof roleTemplates)[0]) => {
+    setFormData((prev) => ({
       ...prev,
       category: template.role,
       systemPrompt: template.prompt,
       icon: template.icon,
-      color: template.color
+      color: template.color,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true)
+    setIsLoading(true);
 
-    if (!formData.name || !formData.description || !formData.systemPrompt || !formData.price) {
+    if (
+      !formData.name ||
+      !formData.description ||
+      !formData.systemPrompt ||
+      !formData.price
+    ) {
       toast({
         title: "Validation Error",
         description: `Please fill in all required fields: Name, Description, System Prompt, Category, Price`,
-        variant: "destructive"
+        variant: "destructive",
       });
-      setIsLoading(false)
+      setIsLoading(false);
       return;
     }
 
@@ -145,7 +151,9 @@ const AgentCreationForm = () => {
         formData.systemPrompt,
         formData.isFree,
         BigInt(formData.price),
-        principal
+        principal,
+        formData.tools.length > 0,
+        formData.tools
       );
 
       toast({
@@ -153,27 +161,27 @@ const AgentCreationForm = () => {
         description: `${formData.name} has been deployed on the NeuroVerse.`,
       });
 
-      setIsLoading(false)
+      setIsLoading(false);
     } catch (e) {
-      console.log(e)
+      console.log(e);
       toast({
         title: "Agent creation error",
         description: "Something went wrong!",
-        variant: "destructive"
-      })
-      setIsLoading(false)
+        variant: "destructive",
+      });
+      setIsLoading(false);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
 
     // Reset form
     setFormData({
-      name: '',
-      description: '',
-      category: '',
-      systemPrompt: '',
-      icon: 'Bot',
-      color: 'text-neon-blue',
+      name: "",
+      description: "",
+      category: "",
+      systemPrompt: "",
+      icon: "Bot",
+      color: "text-neon-blue",
       price: 0.1,
       temperature: 0.7,
       maxTokens: 1000,
@@ -183,19 +191,31 @@ const AgentCreationForm = () => {
         searchSensitivity: 0.7,
         citationsEnabled: true,
         chunkSize: 1000,
-        overlap: 200
+        overlap: 200,
       },
-      isFree: true
+      isFree: true,
+      tools: [],
     });
+  };
+
+  const filteredTools = availableTools
+    ? availableTools.filter((tool) => {
+        return (tool.name + " " + tool.description).includes(toolSearchQuery);
+      })
+    : [];
+
+  const handleSearchTool = (e) => {
+    setToolSearchQuery(e.target.value);
   };
 
   return (
     <div className="space-y-8 ">
-
       {/* Agent Creation Form */}
       <Card className="glassmorphic border-neon-blue/20">
         <CardHeader>
-          <CardTitle className="holographic-text">Agent Configuration</CardTitle>
+          <CardTitle className="holographic-text">
+            Agent Configuration
+          </CardTitle>
           <CardDescription>
             Customize your agent's personality, knowledge, and behavior
           </CardDescription>
@@ -208,17 +228,23 @@ const AgentCreationForm = () => {
                   <Settings className="h-4 w-4" />
                   Basic Settings
                 </TabsTrigger>
-                <TabsTrigger value="knowledge" className="flex items-center gap-2">
+                <TabsTrigger
+                  value="knowledge"
+                  className="flex items-center gap-2"
+                >
                   <FileText className="h-4 w-4" />
                   Knowledge Base
                 </TabsTrigger>
-                <TabsTrigger value="advanced" className="flex items-center gap-2">
-                  <Brain className="h-4 w-4" />
-                  Advanced
+                <TabsTrigger value="tools" className="flex items-center gap-2">
+                  <Puzzle className="h-4 w-4" />
+                  Tools
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="basic" className="space-y-6 mt-6 outline-none focus:outline-none focus:border-none">
+              <TabsContent
+                value="basic"
+                className="space-y-6 mt-6 outline-none focus:outline-none focus:border-none"
+              >
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="text-lg font-bold">
@@ -227,7 +253,12 @@ const AgentCreationForm = () => {
                     <Input
                       id="name"
                       value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
                       placeholder="e.g., MindWell, CogniTutor"
                       className="bg-black/20 focus:ring-neon-blue"
                     />
@@ -240,7 +271,12 @@ const AgentCreationForm = () => {
                     <Input
                       id="role"
                       value={formData.category}
-                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          category: e.target.value,
+                        }))
+                      }
                       placeholder="e.g., Therapist, Tutor, Assistant"
                       className="bg-black/20 focus:ring-neon-blue"
                     />
@@ -254,7 +290,12 @@ const AgentCreationForm = () => {
                   <Input
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     placeholder="A brief description of what your agent does"
                     className="bg-black/20 focus:ring-neon-blue"
                   />
@@ -267,13 +308,19 @@ const AgentCreationForm = () => {
                   <Textarea
                     id="systemPrompt"
                     value={formData.systemPrompt}
-                    onChange={(e) => setFormData(prev => ({ ...prev, systemPrompt: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        systemPrompt: e.target.value,
+                      }))
+                    }
                     placeholder="You are a helpful assistant that..."
                     rows={6}
                     className="bg-black/20 focus:ring-neon-blue"
                   />
                   <p className="text-sm text-muted-foreground">
-                    This defines your agent's personality and behavior. Be specific about tone, expertise, and interaction style.
+                    This defines your agent's personality and behavior. Be
+                    specific about tone, expertise, and interaction style.
                   </p>
                 </div>
 
@@ -281,119 +328,157 @@ const AgentCreationForm = () => {
                   <Checkbox
                     defaultChecked
                     onCheckedChange={(checked) => {
-                      setFormData(prev => ({ ...prev, isFree: checked as boolean }))
+                      setFormData((prev) => ({
+                        ...prev,
+                        isFree: checked as boolean,
+                      }));
                     }}
                     className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-neon-purple data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
                   />
                   <div className="">
-                    <Label htmlFor="systemPrompt" className="text-lg font-bold ">
+                    <Label
+                      htmlFor="systemPrompt"
+                      className="text-lg font-bold "
+                    >
                       Enable Fremium Agent Subscription *
                     </Label>
 
                     <p className="text-sm text-muted-foreground">
-                      This defines your agent's accessibility. This depicts if it will be a fremium subscription or charged.
+                      This defines your agent's accessibility. This depicts if
+                      it will be a fremium subscription or charged.
                     </p>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="pricing" className="text-lg font-bold">
+                    Price (ICP)
+                  </Label>
+                  <Input
+                    id="pricing"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        price: parseFloat(e.target.value) || 0,
+                      }))
+                    }
+                    className="bg-black/20 focus:ring-neon-blue"
+                  />
                 </div>
               </TabsContent>
 
               <TabsContent value="knowledge" className="mt-6">
                 <KnowledgeBaseManager
                   documents={formData.knowledgeBase}
-                  onDocumentsChange={(documents) => setFormData(prev => ({ ...prev, knowledgeBase: documents }))}
+                  onDocumentsChange={(documents) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      knowledgeBase: documents,
+                    }))
+                  }
                   config={formData.knowledgeConfig}
-                  onConfigChange={(config) => setFormData(prev => ({ ...prev, knowledgeConfig: config }))}
+                  onConfigChange={(config) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      knowledgeConfig: config,
+                    }))
+                  }
                 />
               </TabsContent>
 
-              <TabsContent value="advanced" className="space-y-6 mt-6">
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-lg font-bold">Icon</Label>
-                    <Select value={formData.icon} onValueChange={(value) => setFormData(prev => ({ ...prev, icon: value }))}>
-                      <SelectTrigger className="bg-black/20">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {iconOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            <div className="flex items-center gap-2">
-                              <option.icon className="h-4 w-4" />
-                              {option.label}
+              <TabsContent value="tools" className="space-y-6 mt-6">
+                <div>
+                  <h1 className="font-bold text-2xl">
+                    Choose Tools for Your Agent
+                  </h1>
+                  <p className="text-muted-foreground">
+                    Your agent will be able to utilize these tools at runtime.
+                  </p>
+                </div>
+                <div className="space-y-6">
+                  <Input
+                    type="search"
+                    placeholder="Search tool"
+                    onChange={(e) => handleSearchTool(e)}
+                  />
+                  <ul className="space-y-4">
+                    {filteredTools.map((tool, idx: number) => (
+                      <li
+                        key={`tool-${idx}`}
+                        className="bg-gray-900 p-4 rounded-md w-full max-w-sm"
+                      >
+                        <div key={tool.id} className="flex items-center gap-4">
+                          <Checkbox
+                            checked={formData.tools.includes(
+                              tool.id.toString()
+                            )}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  tools: [...prev.tools, tool.id.toString()],
+                                }));
+                              } else {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  tools: prev.tools.filter(
+                                    (value) => value !== tool.id.toString()
+                                  ),
+                                }));
+                              }
+                            }}
+                          />
+                          <div className="-mt-2 flex flex-col w-full">
+                            <div className="flex items-center gap-4 justify-between w-full">
+                              <Label
+                                htmlFor="toggle"
+                                className="font-bold text-lg"
+                              >
+                                {tool.name}
+                              </Label>
+                              <p className="text-muted-foreground">
+                                {tool.tool_type}
+                              </p>
                             </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-lg font-bold">Theme Color</Label>
-                    <Select value={formData.color} onValueChange={(value) => setFormData(prev => ({ ...prev, color: value }))}>
-                      <SelectTrigger className="bg-black/20">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {colorOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            <div className="flex items-center gap-2">
-                              <div className={`w-3 h-3 rounded-full ${option.preview}`} />
-                              {option.label}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="temperature" className="text-lg font-bold">
-                      Creativity (0-1)
-                    </Label>
-                    <Input
-                      id="temperature"
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="1"
-                      value={formData.temperature}
-                      onChange={(e) => setFormData(prev => ({ ...prev, temperature: parseFloat(e.target.value) || 0.7 }))}
-                      className="bg-black/20 focus:ring-neon-blue"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="pricing" className="text-lg font-bold">
-                      Price (ICP)
-                    </Label>
-                    <Input
-                      id="pricing"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
-                      className="bg-black/20 focus:ring-neon-blue"
-                    />
-                  </div>
+                            <p className="text-sm text-muted-foreground">
+                              {tool.description}
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="flex items-center justify-end gap-4 *:bg-slate-200">
+                  {/* <Button>Create Custom Tool</Button> */}
+                  <Link to="/tools-marketplace">
+                    <Button>Browse Marketplace</Button>
+                  </Link>
                 </div>
               </TabsContent>
             </Tabs>
 
-            {isAuthenticated ?
+            {isAuthenticated ? (
               <Button
                 type="submit"
                 size="lg"
                 className="w-full font-bold bg-neon-purple/80 hover:bg-neon-purple text-white disabled:bg-slate-300"
                 disabled={isLoading}
               >
-                {isLoading ? <Loader2 className="animate-spin" />
-                  :
-                  <Rocket className="h-5 w-5" />}
+                {isLoading ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <Rocket className="h-5 w-5" />
+                )}
                 Deploy Agent to NeuroVerse
               </Button>
-              :
-              <AuthBtn className="w-full" />}
+            ) : (
+              <AuthBtn className="w-full" />
+            )}
           </form>
         </CardContent>
       </Card>
@@ -401,7 +486,9 @@ const AgentCreationForm = () => {
       {/* Template Selection */}
       <Card className="glassmorphic border-neon-purple/20">
         <CardHeader>
-          <CardTitle className="holographic-text">Quick Start Templates</CardTitle>
+          <CardTitle className="holographic-text">
+            Quick Start Templates
+          </CardTitle>
           <CardDescription>
             Choose a template to get started quickly, or create from scratch
           </CardDescription>
