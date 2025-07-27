@@ -1,86 +1,240 @@
+---
 # NeuroVerse AI Hub
 
 A decentralized AI agent marketplace built on the Internet Computer Protocol (ICP) that enables users to create, deploy, and monetize AI agents in a fully decentralized environment.
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Folder Structure](#folder-structure)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+
+---
 
 ## Overview
 
-NeuroVerse AI Hub addresses the centralization problem in AI development by providing a platform where developers and users can create, share, and monetize AI agents without relying on traditional cloud infrastructure. 
-Built on ICP's blockchain technology, it ensures permanent availability, transparent transactions, and true ownership of AI assets.
+NeuroVerse AI Hub addresses the centralization problem in AI development by providing a platform where developers and users can create, share, and monetize AI agents without relying on traditional cloud infrastructure. Built on ICP's blockchain technology, it ensures permanent availability, transparent transactions, and true ownership of AI assets.
 
-## Project Description
+**Who is it for?**
 
-NeuroVerse combines advanced AI capabilities with blockchain technology to create a decentralized marketplace for AI agents. Users can:
-- Deploy custom AI agents with specialized knowledge and capabilities
-- Interact with existing agents through a modern web interface
-- Monetize their AI creations through direct token payments
-- Maintain full ownership and control of their data and agents
+- AI developers seeking to deploy and monetize agents
+- Users looking to interact with decentralized AI
+- Web3 and blockchain enthusiasts
 
-## Key Features
+---
 
-- AI Agent Creation & Deployment
-  - Custom knowledge base integration
-  - Configurable agent personalities
+## Features
+
+- **AI Agent Creation & Deployment**
+
+  - Custom knowledge base integration (upload and manage documents)
+  - Configurable agent personalities and system prompts
   - Template-based quick start options
-  
-- Monetization System
-  - Direct ICP token earnings
-  - Usage-based pricing model
-  - Transparent transaction history
-  
-- Decentralized Infrastructure
-  - Blockchain-based data storage
+
+- **Monetization System**
+
+  - Direct ICP token earnings for agent creators
+  - Usage-based pricing model (free, premium, token-gated)
+  - Transparent transaction and earnings history
+
+- **Decentralized Infrastructure**
+
+  - Blockchain-based data storage (ICP canisters)
   - Censorship-resistant deployment
   - User-owned agents and data
-  
-- Modern User Interface
-  - Responsive design
-  - Real-time chat interactions
-  - Holographic visual elements
+
+- **Modern User Interface**
+
+  - Responsive, mobile-friendly design
+  - Real-time chat interactions with AI agents
+  - Holographic and 3D visual elements
+
+- **Marketplace & Management**
+
+  - Discover, search, and filter AI agents
+  - Agent management dashboard for creators
+  - Developer portal for tool and agent submission
+
+- **Authentication & Payments**
+  - Internet Identity, Plug Wallet, and other Web3 auth
+  - ICP token payments and wallet integration
+
+---
 
 ## Tech Stack
 
-- **Frontend**: 
-  - React with TypeScript
-  - TailwindCSS for styling
-  - Vite for development
+- **Frontend**
 
-- **Backend**:
+  - React (TypeScript)
+  - TailwindCSS
+  - Vite
+  - Radix UI, Zustand, React Query, and more
+
+- **Backend**
+
   - Internet Computer Protocol (ICP)
-  - Motoko programming language
+  - Motoko language (canisters)
   - MOPS package manager
 
-- **AI/ML**:
-  - LLM integration
-  - Knowledge base management
-  - Document chunking system
+- **AI/ML**
+
+  - LLM (Large Language Model) integration
+  - Knowledge base management and document chunking
+
+- **Other**
+  - DFX SDK for local development and deployment
+  - ICP Ledger and Auth libraries
+
+---
 
 ## Installation
 
-1. Install prerequisites:
-   - [DFX SDK](https://internetcomputer.org/docs/current/developer-docs/setup/install)
-   - Node.js and npm
-   - Internet Computer Wallet
+### System Requirements
 
-2. Clone and setup:
-```bash
-git clone https://github.com/yourusername/neuroverse.git
-cd neuroverse
-npm install
-```
+- Node.js >= 16.0.0
+- npm >= 7.0.0
+- [DFX SDK](https://internetcomputer.org/docs/current/developer-docs/setup/install)
+- Internet Computer Wallet (Plug, Stoic, etc.)
+
+### Setup Steps
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/yourusername/neuroverse.git
+   cd neuroverse
+   ```
+
+2. **Install dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+3. **Start the local ICP replica:**
+
+   ```bash
+   dfx start --background
+   ```
+
+4. **Deploy the canisters:**
+
+   ```bash
+   dfx deploy
+   ```
+
+5. **Start the frontend development server:**
+   ```bash
+   cd src/neuroverse_frontend
+   npm run dev
+   ```
+
+---
 
 ## Usage
 
-1. Start the local ICP replica:
-```bash
-dfx start --background
+- Access the app at [http://localhost:8080](http://localhost:8080) after running the dev server.
+- Register or log in using Internet Identity or Plug Wallet.
+- Deploy your own AI agent or interact with agents in the marketplace.
+- Manage your agents, earnings, and knowledge base from the dashboard.
+
+### Common Commands
+
+- `npm run dev` – Start the frontend in development mode
+- `npm run build` – Build the frontend for production
+- `dfx start` – Start the local ICP replica
+- `dfx deploy` – Deploy backend and frontend canisters
+
+---
+
+## Configuration
+
+- **Environment Variables:**  
+  The project may use a `.env` file for configuration (see `.gitignore` for exclusion).  
+  By default, DFX outputs environment variables to `.env` as specified in `dfx.json`.
+- **Network Configuration:**
+  - Local development uses `regtest` Bitcoin network.
+  - Production uses `testnet` (see `src/neuroverse_backend/Main.mo` for details).
+- **ICP Canister IDs:**
+  - Managed in `canister_ids.json` (auto-generated by DFX).
+
+---
+
+## Folder Structure
+
+```
+neuroverse-ai-hub/
+│
+├── dfx.json                # DFX project and canister configuration
+├── mops.toml               # Motoko package manager config
+├── package.json            # Root npm workspace config
+├── canister_ids.json       # ICP canister IDs (auto-generated)
+├── src/
+│   ├── neuroverse_backend/ # Motoko backend canisters (AI, Bitcoin, FileVault, etc.)
+│   └── neuroverse_frontend/
+│       ├── src/            # React frontend source code
+│       │   ├── components/ # UI and feature components
+│       │   ├── hooks/      # React hooks
+│       │   ├── functions/  # API and utility functions
+│       │   ├── services/   # Local service logic (chat, analytics, payment, etc.)
+│       │   ├── pages/      # App pages and routes
+│       │   ├── utils/      # Utility functions and types
+│       │   └── ...         # Other frontend assets
+│       ├── public/         # Static assets (images, icons, etc.)
+│       ├── package.json    # Frontend npm config
+│       └── ...             # Frontend config files
+└── README.md               # Project documentation
+
 ```
 
-2. Deploy the canisters:
-```bash
-dfx deploy
-```
+**Key Files:**
 
-3. Start development server:
-```bash
-npm start
-```
+- `dfx.json`: Canister and network configuration for ICP
+- `src/neuroverse_backend/Main.mo`: Main Motoko backend logic
+- `src/neuroverse_frontend/src/App.tsx`: Frontend app entry point
+- `src/neuroverse_frontend/package.json`: Frontend dependencies and scripts
+
+---
+
+## Contributing
+
+Contributions are welcome! To contribute:
+
+1. Fork the repository and create a new branch for your feature or bugfix.
+2. Follow the existing code style and structure.
+3. Add tests or documentation as appropriate.
+4. Submit a pull request with a clear description of your changes.
+
+**Development tips:**
+
+- Use `npm run lint` to check code style.
+- Use DFX for local canister development and testing.
+- See the `src/neuroverse_frontend/README.md` (if available) for frontend-specific notes.
+
+---
+
+## License
+
+_No license file was found in the repository. Please add a LICENSE file to clarify usage rights._
+
+---
+
+## Contact
+
+- **Project:** NeuroVerse AI Hub
+- **Author/Organization:** NeuroVerse
+- **Website:** [https://neuroverse.ai](https://neuroverse.ai)
+- **Twitter:** [@neuroverse_ai](https://twitter.com/neuroverse_ai)
+- **Questions/Support:** Please open an issue or contact the maintainers via the website.
+
+---
+
+If you are a new developer joining the project, please review this README, explore the folder structure, and reach out via the contact methods above for onboarding or questions.
