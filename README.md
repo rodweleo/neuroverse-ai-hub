@@ -117,7 +117,7 @@ Neuroverse was inspired by platforms like **_n8n_** and _**Make.com**_, but buil
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/yourusername/neuroverse.git
+   git clone https://github.com/rodweleo/neuroverse-ai-hub.git
    cd neuroverse
    ```
 
@@ -238,9 +238,7 @@ _No license file was found in the repository. Please add a LICENSE file to clari
 ## Contact
 
 - **Project:** NeuroVerse AI Hub
-- **Author/Organization:** NeuroVerse
-- **Website:** [https://neuroverse.ai](https://neuroverse.ai)
-- **Twitter:** [@neuroverse_ai](https://twitter.com/neuroverse_ai)
+- **Author/Organization:** Rodwell Leo
 - **Questions/Support:** Please open an issue or contact the maintainers via the website.
 
 ---
