@@ -1,7 +1,7 @@
----
 # NeuroVerse AI Hub
 
-A decentralized AI agent marketplace built on the Internet Computer Protocol (ICP) that enables users to create, deploy, and monetize AI agents in a fully decentralized environment.
+A Decentralized AI agent marketplace built on the Internet Computer Protocol (ICP) that enables users to create, deploy, and monetize AI agents in a fully decentralized environment.
+
 ---
 
 ## Table of Contents
