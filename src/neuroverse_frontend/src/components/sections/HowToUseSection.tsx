@@ -43,7 +43,7 @@ const HowToUseSection = () => {
         <h2 className="text-4xl md:text-5xl font-orbitron font-bold holographic-text">
           How It Works
         </h2>
-        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+        <p className="text-md sm:text-xl text-muted-foreground max-w-3xl mx-auto">
           Get started with NeuroVerse in three simple steps and join the
           decentralized AI revolution.
         </p>

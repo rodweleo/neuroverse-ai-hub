@@ -48,19 +48,19 @@ const ToolMarketplace = () => {
 
   return (
     <main className="container py-8 space-y-4">
-      <header className="space-y-4 flex items-end justify-between h-60 bg-gradient-to-r from-neon-blue/30 to-neon-purple/30 p-6 rounded-lg shadow-lg">
+      <header className="space-y-4 flex flex-wrap items-end justify-between h-60 bg-gradient-to-r from-neon-blue/30 to-neon-purple/30 p-6 rounded-lg shadow-lg">
         <div className="space-y-2 w-full max-w-2xl">
-          <h1 className="text-6xl font-orbitron font-bold holographic-text py-2">
+          <h1 className="text-4xl sm:text-6xl font-orbitron font-bold holographic-text py-2">
             Tool Store
           </h1>
-          <p className="text-md text-muted-foreground">
+          <p className="text-md md:text-lg text-muted-foreground">
             Discover, integrate, and monetize AI tools that supercharge your
             agents. From APIs to utilities, build the perfect AI toolkit for any
             use case.
           </p>
         </div>
         <Button
-          className="bg-neon-purple/80 hover:bg-neon-purple"
+          className="bg-neon-purple/80 hover:bg-neon-purple text-white"
           asChild
           onClick={() => setShowDeveloperPortal(true)}
         >

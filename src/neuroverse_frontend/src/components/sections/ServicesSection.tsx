@@ -56,12 +56,12 @@ const ServicesSection = () => {
 
   return (
     <section className="container py-20 space-y-12">
-      <div className="flex items-end justify-between">
+      <div className="flex flex-wrap gap-4 items-end justify-between">
         <div className="space-y-4">
           <h2 className="text-4xl md:text-5xl font-orbitron font-bold holographic-text">
             Our Services
           </h2>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-md sm:text-xl text-muted-foreground">
             Everything you need to create, deploy, and monetize AI agents in the
             decentralized web.
           </p>

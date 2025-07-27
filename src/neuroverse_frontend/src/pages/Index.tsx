@@ -25,7 +25,7 @@ const Index = () => {
       {/* Immersive Hero Section */}
       <div className="relative min-h-screen flex items-center justify-center overflow-hidden rounded-lg  ">
         <div className="relative z-10 container">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid xl:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div className="space-y-8 lg:pr-8">
               {/* Badge */}
@@ -38,12 +38,12 @@ const Index = () => {
 
               {/* Main Heading */}
               <div className="space-y-6">
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-orbitron font-bold leading-tight">
+                <h1 className="text-6xl md:text-7xl lg:text-8xl font-orbitron font-bold leading-tight">
                   <span className="block">NeuroVerse</span>
                   <span className="block text-white mt-2">AI Agents</span>
                 </h1>
 
-                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
+                <p className="text-lg lg:text-xl text-muted-foreground max-w-2xl leading-relaxed">
                   Explore a decentralized universe of AI agents. Interact with
                   them, deploy your own, and shape the future of intelligence on
                   the blockchain.
@@ -55,7 +55,7 @@ const Index = () => {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button
                     size="lg"
-                    className="font-bold bg-gradient-to-r from-neon-purple to-neon-blue hover:from-neon-purple/80 hover:to-neon-blue/80 text-white text-lg px-8 py-6 btn-focus transform hover:scale-105 transition-all duration-300"
+                    className="font-bold bg-neon-purple hover:bg-neon-purple/80 text-white text-lg px-8 py-6 btn-focus transform hover:scale-105 transition-all duration-300"
                     asChild
                   >
                     <Link to="/deploy" aria-label="Deploy your first AI agent">
@@ -66,11 +66,11 @@ const Index = () => {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-2 border-neon-blue text-neon-blue hover:bg-neon-blue/10 backdrop-blur-sm text-lg px-8 py-6 btn-focus transform hover:scale-105 transition-all duration-300"
+                    className="border-2 border-neon-purple text-white hover:bg-neon-purple/50 bg-transparent text-lg px-8 py-6 btn-focus transform hover:scale-105 transition-all duration-300"
                     asChild
                   >
                     <Link
-                      to="/marketplace"
+                      to="/agent-marketplace"
                       aria-label="Try live demo of AI agents"
                     >
                       <Play className="mr-3 h-6 w-6" />
@@ -78,23 +78,6 @@ const Index = () => {
                     </Link>
                   </Button>
                 </div>
-
-                {/* Pricing Card */}
-                {/* <div className="glassmorphic border border-neon-blue/20 rounded-xl p-6 backdrop-blur-md">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-3 h-3 bg-acid-green rounded-full animate-pulse"></div>
-                      <div>
-                        <div className="text-acid-green font-semibold">Free Tier Available</div>
-                        <div className="text-sm text-muted-foreground">Start earning from day one</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-white">$0</div>
-                      <div className="text-xs text-muted-foreground">to start</div>
-                    </div>
-                  </div>
-                </div> */}
               </div>
 
               {/* Features List */}
@@ -146,7 +129,7 @@ const Index = () => {
             </div>
 
             {/* Right Content - 3D Robot */}
-            <div className="relative lg:h-[700px] h-[500px] flex items-center justify-center">
+            <div className=" hidden relative lg:h-[700px] h-[500px] xl:flex items-center justify-center">
               <div
                 className="absolute inset-0 bg-gradient-to-r from-neon-blue/10 via-neon-purple/10 to-acid-green/10 rounded-full blur-3xl animate-pulse"
                 aria-hidden="true"
@@ -212,7 +195,7 @@ const Index = () => {
           <h2 className="text-4xl font-orbitron font-bold holographic-text">
             Discover AI Agents
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-md sm:text-xl text-muted-foreground max-w-3xl mx-auto">
             Browse our collection of intelligent agents, each specialized for
             different tasks and powered by advanced AI models.
           </p>

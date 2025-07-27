@@ -19,19 +19,22 @@ const AgentMarketplace = () => {
   return (
     <div className="container py-8 space-y-8">
       {/* Header */}
-      <header className="space-y-4 flex items-end justify-between h-60 bg-gradient-to-r from-neon-blue/30 to-neon-purple/30 p-6 rounded-lg shadow-lg">
+      <header className="space-y-4 flex flex-wrap items-end justify-between h-60 bg-gradient-to-r from-neon-blue/30 to-neon-purple/30 p-6 rounded-lg shadow-lg">
         <div className="space-y-2">
-          <h1 className="text-6xl font-orbitron font-bold holographic-text py-2">
+          <h1 className="text-4xl sm:text-6xl font-orbitron font-bold holographic-text py-2">
             Agent Marketplace
           </h1>
-          <p className="text-md text-muted-foreground">
+          <p className="text-md sm:text-lg text-muted-foreground">
             Discover, interact with, and deploy AI agents across the NeuroVerse
             ecosystem
           </p>
         </div>
-        <Button className="bg-neon-purple/80 hover:bg-neon-purple" asChild>
+        <Button
+          className="bg-neon-purple/80 hover:bg-neon-purple text-white"
+          asChild
+        >
           <Link to="/deploy">
-            <Zap className="mr-2 h-4 w-4" />
+            <Zap className="h-4 w-4" />
             Deploy Your Agent
           </Link>
         </Button>
