@@ -3,10 +3,13 @@
 A Decentralized AI agent marketplace built on the Internet Computer Protocol (ICP) that enables users to create, deploy, and monetize AI agents in a fully decentralized environment.
 
 ---
-
+# Presentations
+- **Pitch Deck:** [Pitch Deck](https://www.canva.com/design/DAGuFAT-k7E/xcRwsxdpAvYvnvHsmZoJiw/edit?utm_content=DAGuFAT-k7E&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+  
 ## Table of Contents
 
 - [Overview](#overview)
+- [Background](#background)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Installation](#installation)
@@ -22,6 +25,11 @@ A Decentralized AI agent marketplace built on the Internet Computer Protocol (IC
 ## Overview
 
 NeuroVerse AI Hub addresses the centralization problem in AI development by providing a platform where developers and users can create, share, and monetize AI agents without relying on traditional cloud infrastructure. Built on ICP's blockchain technology, it ensures permanent availability, transparent transactions, and true ownership of AI assets.
+
+## Background
+Building and deploying AI agents today requires deep technical knowledge, expensive infrastructure, and limited ownership. Most platforms are centralized, restrict extensibility, and don't offer clear monetization for tool developers or contributors. As a result, non-technical users are left out, and developers have no sustainable incentive to build useful AI integrations. That is why Neuroverse was built.   
+Neuroverse is a Web3-native, no-code platform that lets anyone create, customize, deploy, and monetize AI agents. All this is powered by the Internet Computer Protocol (ICP).   
+Neuroverse was inspired by platforms like **_n8n_** and _**Make.com**_, but built entirely on-chain. Neuroverse grants users complete ownership of their agents and offer developers an open marketplace to monetize their tools.
 
 **Who is it for?**
 
